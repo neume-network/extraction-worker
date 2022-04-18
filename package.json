@@ -2,7 +2,7 @@
   "name": "@music-os/extraction-worker",
   "version": "0.0.1",
   "description": "The purpose of the music-os-core Extraction Worker (short: \"EW\") is to parallelize retrieving distributed information from various data sources by abstracting away the complexity of scaling processes accross a distributed system such as e.g. multiple node.js Worker threads.",
-  "main": "./src/index.mjs",
+  "main": "./src/worker.mjs",
   "ava": {
     "files": ["!test/start.mjs"],
     "nodeArguments": ["--loader=esmock", "--no-warnings"],
