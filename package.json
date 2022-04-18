@@ -4,18 +4,28 @@
   "description": "The purpose of the music-os-core Extraction Worker (short: \"EW\") is to parallelize retrieving distributed information from various data sources by abstracting away the complexity of scaling processes accross a distributed system such as e.g. multiple node.js Worker threads.",
   "main": "./src/index.mjs",
   "ava": {
-    "nodeArguments": ["--loader=esmock", "--no-warnings"],
+    "nodeArguments": [
+      "--loader=esmock",
+      "--no-warnings"
+    ],
     "environmentVariables": {
       "DEBUG": "music-os-extraction-worker:*",
       "RPC_HTTP_HOST": "https://cloudflare-eth.com"
     },
-    "require": ["dotenv/config"]
+    "require": [
+      "dotenv/config"
+    ]
+  },
+  "lint-staged": {
+    "*.{mjs,js,css,md}": "prettier --write",
+    "*.{js,css,md}": "prettier --write"
   },
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "test": "ava --verbose --timeout=20s"
+    "test": "ava --verbose --timeout=20s",
+    "prepare": "husky install"
   },
   "repository": {
     "type": "git",
@@ -40,7 +50,10 @@
   "devDependencies": {
     "ava": "4.2.0",
     "esmock": "1.7.5",
-    "expressively-mocked-fetch": "0.2.2"
+    "expressively-mocked-fetch": "0.2.2",
+    "husky": "7.0.4",
+    "lint-staged": "12.3.8",
+    "prettier": "2.6.2"
   },
   "dependencies": {
     "ajv": "8.11.0",
