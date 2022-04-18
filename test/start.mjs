@@ -1,10 +1,7 @@
-import "dotenv/config";
 import { Worker, isMainThread, workerData } from "worker_threads";
 
-import logger from "./logger.mjs";
-import { run } from "./worker.mjs";
+import { run } from "../src/worker.mjs";
 
-const log = logger("start");
 const module = {
   defaults: {
     workerData: {
@@ -14,7 +11,7 @@ const module = {
 };
 
 if (isMainThread) {
-  log("Detected mainthread: Respawning extractor as worker_thread");
+  console.log("Detected mainthread: Respawning extractor as worker_thread");
   // INFO: We're launching this file as a `Worker` when the mainthread is
   // detected as this can be useful when running it without an accompanying
   // other process.

@@ -11,7 +11,7 @@ import test from "ava";
 import { messages } from "../src/api.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const extractorPath = resolve(__dirname, "../src/start.mjs");
+const extractorPath = resolve(__dirname, "../test/start.mjs");
 
 test("sending throwing job to worker", async (t) => {
   const workerData = { concurrency: 1 };
