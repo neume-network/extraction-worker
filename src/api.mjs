@@ -44,6 +44,37 @@ const httpsMsg = {
   required: ["type", "version", "error", "results", "options"],
 };
 
+const graphqlMsg = {
+  type: "object",
+  properties: {
+    type: {
+      type: "string",
+      enum: ["graphql"],
+    },
+    version: {
+      type: "string",
+    },
+    options: {
+      type: "object",
+      properties: {
+        url: { type: "string" },
+        body: { type: "string" },
+        headers: { type: "object" },
+      },
+      required: ["url", "body"],
+    },
+    results: {
+      type: "object",
+      nullable: true,
+    },
+    error: {
+      type: "string",
+      nullable: true,
+    },
+  },
+  required: ["type", "version", "options", "results", "error"],
+};
+
 const jsonRPCMsg = {
   type: "object",
   properties: {
@@ -95,7 +126,7 @@ const exitMsg = {
 };
 
 const schema = {
-  oneOf: [jsonRPCMsg, exitMsg, httpsMsg],
+  oneOf: [graphqlMsg, jsonRPCMsg, exitMsg, httpsMsg],
 };
 
 const check = ajv.compile(schema);
@@ -117,6 +148,30 @@ function validate(value) {
   return true;
 }
 
+async function request(url, method, body, headers) {
+  let options = {
+    method,
+  };
+
+  if (body) {
+    options.body = body;
+  }
+  if (headers) {
+    options.headers = headers;
+  }
+
+  // NOTE: We let `fetch` throw. Error must be caught on `request` user level.
+  const results = await fetch(url, options);
+
+  if (results.status >= 400) {
+    throw new Error(`Request unsuccessful with status: ${results.status}`);
+  }
+
+  // TODO: Invalid assumption here: JSON parsing should only happen when
+  // respective accept header is set.
+  return await results.json();
+}
+
 async function route(message, cb) {
   const { type } = message;
 
@@ -128,51 +183,39 @@ async function route(message, cb) {
     try {
       results = await translate(options, method, params);
     } catch (error) {
-      return cb({ ...message, error });
+      return cb({ ...message, error: error.toString() });
     }
 
     return cb(null, { ...message, results });
   } else if (type === "https") {
     const { url, method, body, headers } = message.options;
-    let options = {
-      method,
-    };
+    let data;
 
-    if (body) {
-      options.body = body;
-    }
-    if (headers) {
-      options.headers = headers;
-    }
-
-    let results;
     try {
-      results = await fetch(url, options);
+      data = await request(url, method, body, headers);
     } catch (error) {
       return cb({ ...message, error: error.toString() });
     }
+    return cb(null, { ...message, results: data });
+  } else if (type === "graphql") {
+    const { url, body, headers } = message.options;
+    const method = "POST";
 
-    if (results.status >= 400) {
-      return cb({
-        ...message,
-        error: new Error(
-          `Request unsuccessful with status: ${results.status}`
-        ).toString(),
-      });
-    }
-
-    // TODO: Invalid assumption here: JSON parsing should only happen when
-    // respective accept header is set.
     let data;
     try {
-      data = await results.json();
+      data = await request(url, method, body, headers);
     } catch (error) {
       return cb({ ...message, error: error.toString() });
+    }
+
+    if (data.errors) {
+      // NOTE: For now, we're only returning the first error message.
+      return cb({ ...message, error: data.errors[0].message });
     }
 
     return cb(null, { ...message, results: data });
   } else {
-    return cb({ ...message, error: new NotImplementedError() });
+    return cb({ ...message, error: new NotImplementedError().toString() });
   }
 }
 

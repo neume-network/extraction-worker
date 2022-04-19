@@ -8,6 +8,23 @@ import createWorker from "expressively-mocked-fetch";
 import { messages } from "../src/api.mjs";
 import { ValidationError } from "../src/errors.mjs";
 
+test("sending a graphql message", (t) => {
+  const message = {
+    type: "graphql",
+    version: messages.version,
+    options: {
+      url: "https://example.com",
+      body: JSON.stringify({
+        query: `{ nfts(first: 1, skip: 0) { id } }`,
+      }),
+    },
+    results: null,
+    error: null,
+  };
+
+  t.true(messages.validate(message));
+});
+
 test("sending invalid json as response", async (t) => {
   const worker = await createWorker(`
     app.get('/', function (req, res) {
@@ -101,6 +118,54 @@ test("executing https job", async (t) => {
 
   t.plan(4);
   const cb = (err, response) => {
+    t.truthy(response);
+    t.truthy(response.results.data);
+    t.truthy(response.results.data.nfts);
+    t.true(response.results.data.nfts.length > 0);
+  };
+  await messages.route(message, cb);
+});
+
+test("fail to execute a graphql job", async (t) => {
+  const message = {
+    type: "graphql",
+    version: messages.version,
+    options: {
+      url: "https://api.thegraph.com/subgraphs/name/timdaub/web3musicsubgraph",
+      body: JSON.stringify({
+        query: `nonsense query`,
+      }),
+    },
+    results: null,
+    error: null,
+  };
+
+  t.plan(3);
+  const cb = (err, response) => {
+    t.falsy(response);
+    t.true(typeof err.error === "string");
+    t.truthy(err);
+  };
+  await messages.route(message, cb);
+});
+
+test("executing a graphql job", async (t) => {
+  const message = {
+    type: "graphql",
+    version: messages.version,
+    options: {
+      url: "https://api.thegraph.com/subgraphs/name/timdaub/web3musicsubgraph",
+      body: JSON.stringify({
+        query: `{ nfts(first: 1000) { id } }`,
+      }),
+    },
+    results: null,
+    error: null,
+  };
+
+  t.plan(5);
+  const cb = (err, response) => {
+    t.falsy(err);
     t.truthy(response);
     t.truthy(response.results.data);
     t.truthy(response.results.data.nfts);
