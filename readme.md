@@ -37,7 +37,7 @@ The Extractor Worker JSON Message Object is sent via
 [`postMessage`](https://nodejs.org/api/worker_threads.html#workerpostmessagevalue-transferlist)
 to a `Worker` instance. An answer of this message can then be expected
 within a reasonable timeframe. The EW implements a minimal queue, which is why
-a weak prioritization of submitted tasks is to expect.
+a weak prioritization of submitted tasks can be expected.
 
 Below is a sequence diagram of the entire flow:
 
