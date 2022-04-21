@@ -63,6 +63,6 @@
     "cross-fetch": "3.1.5",
     "debug": "4.3.4",
     "dotenv": "16.0.0",
-    "eth-fun": "0.5.3"
+    "eth-fun": "0.6.0"
   }
 }
