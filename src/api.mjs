@@ -3,6 +3,12 @@ import { exit } from "process";
 
 import Ajv from "ajv";
 import fetch from "cross-fetch";
+import {
+  exit as exitMsg,
+  https,
+  jsonrpc,
+  graphql,
+} from "@music-os/message-schema";
 
 import logger from "./logger.mjs";
 import { ValidationError, NotImplementedError } from "./errors.mjs";
@@ -12,121 +18,8 @@ const log = logger("api");
 const ajv = new Ajv();
 const version = "0.0.1";
 
-const httpsMsg = {
-  type: "object",
-  properties: {
-    type: {
-      type: "string",
-      enum: ["https"],
-    },
-    version: {
-      type: "string",
-    },
-    options: {
-      type: "object",
-      properties: {
-        url: { type: "string" },
-        method: { type: "string" },
-        body: { type: "string" },
-        headers: { type: "object" },
-      },
-      required: ["url", "method"],
-    },
-    results: {
-      type: "object",
-      nullable: true,
-    },
-    error: {
-      type: "string",
-      nullable: true,
-    },
-  },
-  required: ["type", "version", "error", "results", "options"],
-};
-
-const graphqlMsg = {
-  type: "object",
-  properties: {
-    type: {
-      type: "string",
-      enum: ["graphql"],
-    },
-    version: {
-      type: "string",
-    },
-    options: {
-      type: "object",
-      properties: {
-        url: { type: "string" },
-        body: { type: "string" },
-        headers: { type: "object" },
-      },
-      required: ["url", "body"],
-    },
-    results: {
-      type: "object",
-      nullable: true,
-    },
-    error: {
-      type: "string",
-      nullable: true,
-    },
-  },
-  required: ["type", "version", "options", "results", "error"],
-};
-
-const jsonRPCMsg = {
-  type: "object",
-  properties: {
-    type: {
-      type: "string",
-      enum: ["json-rpc"],
-    },
-    version: {
-      type: "string",
-    },
-    options: {
-      type: "object",
-      properties: {
-        url: { type: "string" },
-      },
-      required: ["url"],
-    },
-    method: {
-      type: "string",
-    },
-    params: {
-      type: "array",
-    },
-    results: {
-      type: "object",
-      nullable: true,
-    },
-    error: {
-      type: "string",
-      nullable: true,
-    },
-  },
-  // TODO: Require `error`
-  required: ["type", "method", "params", "results", "version", "options"],
-};
-
-const exitMsg = {
-  type: "object",
-  required: ["type", "version"],
-  properties: {
-    type: {
-      type: "string",
-      enum: ["exit"],
-    },
-    version: {
-      type: "string",
-    },
-  },
-};
-
 const schema = {
-  oneOf: [graphqlMsg, jsonRPCMsg, exitMsg, httpsMsg],
+  oneOf: [graphql, jsonrpc, exitMsg, https],
 };
 
 const check = ajv.compile(schema);
