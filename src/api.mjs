@@ -8,7 +8,7 @@ import {
   https,
   jsonrpc,
   graphql,
-} from "@music-os/message-schema";
+} from "@neume-network/message-schema";
 
 import logger from "./logger.mjs";
 import { ValidationError, NotImplementedError } from "./errors.mjs";

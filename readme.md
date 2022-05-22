@@ -1,6 +1,6 @@
 # Extractor Worker API
 
-The purpose of the music-os-core Extraction Worker (short: "EW") is to
+The purpose of the neume-network/extraction-worker (short: "EW") is to
 parallelize retrieving distributed information from various data sources by
 abstracting away the complexity of scaling processes accross a distributed
 system such as e.g. multiple node.js
@@ -9,12 +9,13 @@ system such as e.g. multiple node.js
 ## Installation
 
 ```bash
-npm i @music-os/extraction-worker
+npm i @neume-network/extraction-worker
 ```
 
 ## Interface
 
-A single interface allows sending new jobs to the music-os-core `Worker`. Using
+A single interface allows sending new jobs to the neume-network-core `Worker`.
+Using
 [`postMessage`](https://nodejs.org/api/worker_threads.html#workerpostmessagevalue-transferlist)
 and by sending a specific Extractor Worker JSON message object, within a
 reasonable timeframe, the worker will send back the retrieved record.
@@ -29,7 +30,7 @@ different manifestations of the API.
 The goal is to keep this document up-to-date with the actual implementation of
 the Extractor Worker API. If you find this document out-of-date, please
 consider
-[contributing](https://github.com/music-os/music-os-core/blob/main/contributing.md).
+[contributing](https://github.com/neume-network/neume-network-core/blob/main/contributing.md).
 
 ## Extractor Worker Flow
 
