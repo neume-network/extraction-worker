@@ -22,6 +22,7 @@ test("sending throwing job to worker", async (t) => {
     options: {
       url: env.RPC_HTTP_HOST,
     },
+    commissioner: "soundxyz",
     version: messages.version,
     type: "json-rpc",
     method: "willmakeworkerthrow",
@@ -57,6 +58,7 @@ test("running script in worker queue", async (t) => {
     options: {
       url: env.RPC_HTTP_HOST,
     },
+    commissioner: "soundxyz",
     version: messages.version,
     type: "json-rpc",
     method: "eth_getTransactionReceipt",

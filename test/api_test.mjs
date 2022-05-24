@@ -12,6 +12,7 @@ test("sending a graphql message", (t) => {
   const message = {
     type: "graphql",
     version: messages.version,
+    commissioner: "soundxyz",
     options: {
       url: "https://example.com",
       body: JSON.stringify({
@@ -196,6 +197,7 @@ test("validating schema `type` prop", (t) => {
     options: {
       url: env.RPC_HTTP_HOST,
     },
+    commissioner: "soundxyz",
     version: messages.version,
     type: "json-rpc",
     method: "eth_getBlockByNumber",
@@ -208,6 +210,7 @@ test("validating schema `type` prop", (t) => {
 test("validating http job schema", (t) => {
   const message = {
     type: "https",
+    commissioner: "soundxyz",
     version: "0.0.1",
     options: {
       url: "https://example.com",
