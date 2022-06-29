@@ -14,7 +14,13 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const extractorPath = resolve(__dirname, "../test/start.mjs");
 
 test("sending throwing job to worker", async (t) => {
-  const workerData = { concurrency: 1 };
+  const workerData = {
+    queue: {
+      options: {
+        concurrency: 1,
+      },
+    },
+  };
   const w = new Worker(extractorPath, {
     workerData,
   });
@@ -40,7 +46,13 @@ test("sending throwing job to worker", async (t) => {
 });
 
 test("shutting down extractor worker", async (t) => {
-  const workerData = { concurrency: 1 };
+  const workerData = {
+    queue: {
+      options: {
+        concurrency: 1,
+      },
+    },
+  };
   const w = new Worker(extractorPath, {
     workerData,
   });
@@ -50,7 +62,13 @@ test("shutting down extractor worker", async (t) => {
 
 // TODO: Sandbox call with fetch-mock
 test("running script in worker queue", async (t) => {
-  const workerData = { concurrency: 1 };
+  const workerData = {
+    queue: {
+      options: {
+        concurrency: 1,
+      },
+    },
+  };
   const w = new Worker(extractorPath, {
     workerData,
   });

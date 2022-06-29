@@ -5,7 +5,11 @@ import { run } from "../src/worker.mjs";
 const module = {
   defaults: {
     workerData: {
-      concurrency: 1,
+      queue: {
+        options: {
+          concurrency: 1,
+        },
+      },
     },
   },
 };

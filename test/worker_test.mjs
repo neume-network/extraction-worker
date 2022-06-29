@@ -2,8 +2,31 @@
 import test from "ava";
 import esmock from "esmock";
 
+import Queue from "better-queue";
+
 import { messages } from "../src/api.mjs";
 import { loggingProxy } from "../src/worker.mjs";
+
+test("if run returns queue instance", async (t) => {
+  const workerData = {
+    queue: {
+      options: {
+        concurrency: 1,
+      },
+    },
+  };
+  const { run } = await esmock("../src/worker.mjs", null, {
+    worker_threads: {
+      parentPort: {
+        on: () => {}, // noop
+        postMessage: () => {}, // noop
+      },
+      workerData,
+    },
+  });
+  const queue = run();
+  t.true(queue instanceof Queue);
+});
 
 test("logging proxy", (t) => {
   t.plan(3);

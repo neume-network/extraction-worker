@@ -44,13 +44,15 @@ export function loggingProxy(queue, handler) {
   };
 }
 
-export async function run() {
-  log("Starting as worker thread");
-  const { concurrency } = workerData;
-  const queue = new Queue(messages.route, {
-    concurrent: concurrency,
-  });
+export function run() {
+  log(
+    `Starting as worker thread with queue options: "${JSON.stringify(
+      workerData.queue.options
+    )}`
+  );
+  const queue = new Queue(messages.route, workerData.queue.options);
   queue.on("task_finish", loggingProxy(queue, reply));
   queue.on("task_failed", loggingProxy(queue, panic));
   parentPort.on("message", messageHandler(queue));
+  return queue;
 }
