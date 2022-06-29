@@ -10,10 +10,29 @@ import { translate } from "./eth.mjs";
 
 const log = logger("worker");
 
-export function panic(taskId, message) {
-  const error = message.error.toString();
-  log(error);
-  parentPort.postMessage({ ...message, error });
+export function panic(taskId, error, stats) {
+  // NOTE: See: https://github.com/diamondio/better-queue/issues/82
+  let message;
+  if (error && error instanceof Error) {
+    error = error.toString();
+  } else if (error && error instanceof Object) {
+    message = { error: error.error };
+    error = JSON.stringify(error);
+  }
+  log(
+    `Panic in queue with taskId "${taskId}", error "${error}" and stats "${JSON.stringify(
+      stats
+    )}"`
+  );
+  if (message) {
+    parentPort.postMessage(message);
+  } else {
+    // TODO: Need to get the context of where that error was thrown, e.g. can
+    // we get the task's message through `taskId` somehow? Otherwise,
+    // how useful is it to throw this error outside and which message schema
+    // should it be?
+    log("WARNING: Error isn't propagated outside of extration worker");
+  }
 }
 
 export function reply(taskId, message) {
@@ -25,7 +44,7 @@ export function messageHandler(queue) {
     try {
       messages.validate(message);
     } catch (error) {
-      return panic(null, { ...message, error: error.toString() });
+      return panic("no-task-id-error-thrown-from-messageHandler", error);
     }
 
     if (message.type === "exit") {

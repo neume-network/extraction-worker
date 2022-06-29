@@ -7,6 +7,24 @@ import Queue from "better-queue";
 import { messages } from "../src/api.mjs";
 import { loggingProxy } from "../src/worker.mjs";
 
+test.skip("panic function", async (t) => {
+  const taskId = "taskId";
+  const error = "error";
+  const stats = "stats";
+  t.plan(1);
+  const { panic } = await esmock("../src/worker.mjs", null, {
+    worker_threads: {
+      parentPort: {
+        postMessage: (message) => {
+          t.is(message.error, error);
+        },
+      },
+      workerData: {},
+    },
+  });
+  panic(taskId, error, stats);
+});
+
 test("if run returns queue instance", async (t) => {
   const workerData = {
     queue: {
@@ -46,7 +64,7 @@ test("logging proxy", (t) => {
   loggingProxy(queueMock, handlerMock)(taskId, message);
 });
 
-test("test throw on invalid message", async (t) => {
+test.skip("test throw on invalid message", async (t) => {
   t.plan(1);
   const workerMock = await esmock("../src/worker.mjs", null, {
     worker_threads: {
