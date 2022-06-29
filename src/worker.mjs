@@ -37,13 +37,20 @@ export function messageHandler(queue) {
   };
 }
 
+export function loggingProxy(queue, handler) {
+  return (...args) => {
+    log(`Queue stats: ${JSON.stringify(queue.getStats())}`);
+    return handler(...args);
+  };
+}
+
 export async function run() {
   log("Starting as worker thread");
   const { concurrency } = workerData;
   const queue = new Queue(messages.route, {
     concurrent: concurrency,
   });
-  queue.on("task_finish", reply);
-  queue.on("task_failed", panic);
+  queue.on("task_finish", loggingProxy(queue, reply));
+  queue.on("task_failed", loggingProxy(queue, panic));
   parentPort.on("message", messageHandler(queue));
 }

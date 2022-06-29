@@ -3,6 +3,25 @@ import test from "ava";
 import esmock from "esmock";
 
 import { messages } from "../src/api.mjs";
+import { loggingProxy } from "../src/worker.mjs";
+
+test("logging proxy", (t) => {
+  t.plan(3);
+  const taskId = "id";
+  const message = "message";
+  const handlerMock = (arg1, arg2) => {
+    t.is(taskId, arg1);
+    t.is(message, arg2);
+  };
+  const queueMock = {
+    getStats: () => {
+      t.true(true);
+      return "test value";
+    },
+  };
+
+  loggingProxy(queueMock, handlerMock)(taskId, message);
+});
 
 test("test throw on invalid message", async (t) => {
   t.plan(1);
