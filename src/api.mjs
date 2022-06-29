@@ -70,7 +70,6 @@ async function route(message, cb) {
 
   if (type === "json-rpc") {
     const { method, params, options } = message;
-    log(`Calling JSON-RPC endpoint with method: ${method}`);
     let results;
 
     try {
