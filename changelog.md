@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.0
+
+- (breaking) Pass entire queue `options` configuration through `workerData`.
+- (breaking) Make `eth-fun` a peerDependency.
+- Through `DEBUG` environment variable, allow inspecting queue's statistics.
+- Improve internal error handling.
+- Upgrade to @neume-network/message-schema@0.3.1 that includes the `timeout`
+  property and implement timeouts with `AbortSignal`.
+- Improve error messages for messages of type `https`
+
 ## 0.2.0
 
 - Updated to [neume-network/message-schema@0.3.0](https://github.com/neume-network/message-schema/blob/78bb2cc566403d733df20d6c2ab5b86cfcc11e17/changelog.md#030)
