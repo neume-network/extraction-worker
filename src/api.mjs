@@ -59,14 +59,26 @@ export async function request(url, method, body, headers, signal) {
 
   // NOTE: We let `fetch` throw. Error must be caught on `request` user level.
   const results = await fetch(url, options);
+  const answer = await results.text();
 
   if (results.status >= 400) {
-    throw new Error(`Request unsuccessful with status: ${results.status}`);
+    throw new Error(
+      `Request to url "${url}" with method "${method}" and body "${JSON.stringify(
+        body
+      )}" unsuccessful with status: ${results.status} and answer: "${answer}"`
+    );
   }
 
-  // TODO: Invalid assumption here: JSON parsing should only happen when
-  // respective accept header is set.
-  return await results.json();
+  let data;
+  try {
+    data = JSON.parse(answer);
+  } catch (err) {
+    throw new Error(
+      `Encountered error when trying to parse JSON body result: "${answer}", error: "${err.toString()}"`
+    );
+  }
+
+  return data;
 }
 
 // NOTE: `AbortSignal.timeout` isn't yet supported:

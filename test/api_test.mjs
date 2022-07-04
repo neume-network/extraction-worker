@@ -122,7 +122,38 @@ test("sending invalid json as response", async (t) => {
 
   t.plan(3);
   const cb = (err, response) => {
-    t.true(err.error.includes("invalid json response"));
+    t.true(err.error.includes("Encountered error when trying to parse"));
+    t.falsy(response);
+    t.truthy(err);
+  };
+  await messages.route(message, cb);
+});
+
+test("failing https request with status and body", async (t) => {
+  const httpStatus = 401;
+  const httpMessage = "bad request";
+  const worker = await createWorker(`
+    app.get('/', function (req, res) {
+      res.status(${httpStatus}).send("${httpMessage}");
+    });
+  `);
+  const message = {
+    type: "https",
+    version: messages.version,
+    options: {
+      url: `http://localhost:${worker.port}`,
+      method: "GET",
+    },
+    results: null,
+    error: null,
+  };
+
+  t.plan(6);
+  const cb = (err, response) => {
+    t.true(err.error.includes(message.options.url));
+    t.true(err.error.includes(message.options.method));
+    t.true(err.error.includes(httpMessage));
+    t.true(err.error.includes(httpStatus));
     t.falsy(response);
     t.truthy(err);
   };
