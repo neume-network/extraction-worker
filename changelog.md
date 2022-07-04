@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.1
+
+- Properly pass numerical timeout value in milliseconds to `setTimeout`.
+
 ## 0.3.0
 
 - (breaking) Pass entire queue `options` configuration through `workerData`.
