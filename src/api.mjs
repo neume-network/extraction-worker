@@ -9,6 +9,7 @@ import {
   jsonrpc,
   graphql,
 } from "@neume-network/message-schema";
+import AbortController from "abort-controller";
 
 import logger from "./logger.mjs";
 import { ValidationError, NotImplementedError } from "./errors.mjs";
@@ -41,7 +42,7 @@ function validate(value) {
   return true;
 }
 
-async function request(url, method, body, headers) {
+export async function request(url, method, body, headers, signal) {
   let options = {
     method,
   };
@@ -51,6 +52,9 @@ async function request(url, method, body, headers) {
   }
   if (headers) {
     options.headers = headers;
+  }
+  if (signal) {
+    options.signal = signal;
   }
 
   // NOTE: We let `fetch` throw. Error must be caught on `request` user level.
@@ -65,12 +69,27 @@ async function request(url, method, body, headers) {
   return await results.json();
 }
 
+// NOTE: `AbortSignal.timeout` isn't yet supported:
+// https://github.com/mysticatea/abort-controller/issues/35
+export const AbortSignal = {
+  timeout: function (value) {
+    const controller = new AbortController();
+    setTimeout(() => controller.abort(value));
+    return controller.signal;
+  },
+};
+
 async function route(message, cb) {
   const { type } = message;
 
   if (type === "json-rpc") {
     const { method, params, options } = message;
     let results;
+
+    if (options.timeout) {
+      options.signal = AbortSignal.timeout(options.timeout);
+      delete options.timeout;
+    }
 
     try {
       results = await translate(options, method, params);
@@ -80,11 +99,16 @@ async function route(message, cb) {
 
     return cb(null, { ...message, results });
   } else if (type === "https") {
-    const { url, method, body, headers } = message.options;
-    let data;
+    const { url, method, body, headers, timeout } = message.options;
 
+    let signal;
+    if (timeout) {
+      signal = AbortSignal.timeout(timeout);
+    }
+
+    let data;
     try {
-      data = await request(url, method, body, headers);
+      data = await request(url, method, body, headers, signal);
     } catch (error) {
       return cb({ ...message, error: error.toString() });
     }

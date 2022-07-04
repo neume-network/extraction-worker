@@ -10,6 +10,7 @@ system such as e.g. multiple node.js
 
 ```bash
 npm i @neume-network/extraction-worker
+npm i eth-fun --no-save # to install eth-fun as a peer dependency
 ```
 
 ## Interface

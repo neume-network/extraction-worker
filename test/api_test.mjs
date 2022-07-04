@@ -5,8 +5,85 @@ import test from "ava";
 import esmock from "esmock";
 import createWorker from "expressively-mocked-fetch";
 
-import { messages } from "../src/api.mjs";
+import { request, messages, AbortSignal } from "../src/api.mjs";
 import { ValidationError } from "../src/errors.mjs";
+
+test("sending a json-rpc request that times out", async (t) => {
+  const delay = 1000;
+  const worker = await createWorker(`
+    app.post('/', async (req, res) => {
+      await new Promise((resolve) => setTimeout(resolve, ${delay}));
+      res.status(200).send("hello world");
+    });
+  `);
+
+  const timeout = 500;
+  const message = {
+    options: {
+      timeout,
+      url: `http://localhost:${worker.port}`,
+    },
+    version: messages.version,
+    type: "json-rpc",
+    method: "eth_getTransactionReceipt",
+    params: [
+      "0xed14c3386aea0c5b39ffea466997ff13606eaedf03fe7f431326531f35809d1d",
+    ],
+    results: null,
+    error: null,
+  };
+
+  t.plan(3);
+  const cb = (err, response) => {
+    t.truthy(err);
+    t.true(err.error.includes("AbortError"));
+    t.falsy(response);
+  };
+  await messages.route(message, cb);
+});
+
+test("sending an https request that times out", async (t) => {
+  const delay = 1000;
+  const worker = await createWorker(`
+    app.get('/', async (req, res) => {
+      await new Promise((resolve) => setTimeout(resolve, ${delay}));
+      res.status(200).send("hello world");
+    });
+  `);
+
+  const timeout = 500;
+  const message = {
+    type: "https",
+    version: messages.version,
+    options: {
+      timeout,
+      url: `http://localhost:${worker.port}`,
+      method: "GET",
+    },
+    results: null,
+    error: null,
+  };
+
+  t.plan(3);
+  const cb = (err, response) => {
+    t.truthy(err);
+    t.true(err.error.includes("AbortError"));
+    t.falsy(response);
+  };
+  await messages.route(message, cb);
+});
+
+test("setting a timeout", async (t) => {
+  const timeout = 100;
+  const signal = AbortSignal.timeout(timeout);
+  t.plan(1);
+  let called = false;
+  signal.addEventListener("abort", () => {
+    called = true;
+  });
+  await new Promise((resolve) => setTimeout(resolve, timeout + 5));
+  t.true(called);
+});
 
 test("sending a graphql message", (t) => {
   const message = {
@@ -223,7 +300,7 @@ test("validating http job schema", (t) => {
   t.true(messages.validate(message));
 });
 
-test("routing a json-rpc job", async (t) => {
+test("sending a json-rpc job", async (t) => {
   const message = {
     options: {
       url: env.RPC_HTTP_HOST,
