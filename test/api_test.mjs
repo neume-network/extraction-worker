@@ -73,6 +73,18 @@ test("sending an https request that times out", async (t) => {
   await messages.route(message, cb);
 });
 
+test("setting a timeout that isn't triggered", async (t) => {
+  const timeout = 1000;
+  const signal = AbortSignal.timeout(timeout);
+  t.plan(1);
+  let called = false;
+  signal.addEventListener("abort", () => {
+    called = true;
+  });
+  await new Promise((resolve) => setTimeout(resolve, timeout - timeout / 2));
+  t.false(called);
+});
+
 test("setting a timeout", async (t) => {
   const timeout = 100;
   const signal = AbortSignal.timeout(timeout);

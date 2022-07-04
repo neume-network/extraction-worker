@@ -86,7 +86,7 @@ export async function request(url, method, body, headers, signal) {
 export const AbortSignal = {
   timeout: function (value) {
     const controller = new AbortController();
-    setTimeout(() => controller.abort(value));
+    setTimeout(() => controller.abort(), value);
     return controller.signal;
   },
 };
