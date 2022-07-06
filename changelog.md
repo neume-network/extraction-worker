@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.2
+
+- Add `eth_getLogs` translation
+
 ## 0.3.1
 
 - Properly pass numerical timeout value in milliseconds to `setTimeout`.
