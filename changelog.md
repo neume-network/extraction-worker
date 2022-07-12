@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.0
+
+- (breaking) Upgrade to eth-fun@0.9.0
+
 ## 0.3.2
 
 - Add `eth_getLogs` translation
