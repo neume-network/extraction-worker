@@ -67,6 +67,6 @@
     "dotenv": "16.0.0"
   },
   "peerDependencies": {
-    "eth-fun": "0.8.0"
+    "eth-fun": "0.9.x"
   }
 }
