@@ -14,15 +14,14 @@ export function panic(taskId, error, stats) {
   // NOTE: See: https://github.com/diamondio/better-queue/issues/82
   let message;
   if (error && error instanceof Error) {
-    error = error.toString();
+    message = error.toString();
   } else if (error && error instanceof Object) {
     message = { ...error };
-    error = JSON.stringify(error);
   }
   log(
-    `Panic in queue with taskId "${taskId}", error "${error}" and stats "${JSON.stringify(
-      stats
-    )}"`
+    `Panic in queue with taskId "${taskId}", error "${JSON.stringify(
+      message
+    )}" and stats "${JSON.stringify(stats)}"`
   );
   if (message) {
     parentPort.postMessage(message);
@@ -44,7 +43,10 @@ export function messageHandler(queue) {
     try {
       messages.validate(message);
     } catch (error) {
-      return panic("no-task-id-error-thrown-from-messageHandler", error);
+      return panic("no-task-id-error-thrown-from-messageHandler", {
+        ...message,
+        error: error.toString(),
+      });
     }
 
     if (message.type === "exit") {
