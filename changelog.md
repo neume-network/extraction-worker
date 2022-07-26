@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.0
+
+- (breaking) Upon failures in the worker/queue, extraction-worker attempts to
+  return as much context back to the user by e.g. sending the augmented message
+  object (with the `error` property filled out). This may have been broken in
+  earlier versions.
+
 ## 0.4.0
 
 - (breaking) Upgrade to eth-fun@0.9.0
