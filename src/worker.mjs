@@ -16,7 +16,7 @@ export function panic(taskId, error, stats) {
   if (error && error instanceof Error) {
     error = error.toString();
   } else if (error && error instanceof Object) {
-    message = { error: error.error };
+    message = { ...error };
     error = JSON.stringify(error);
   }
   log(
