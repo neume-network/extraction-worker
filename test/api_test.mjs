@@ -9,18 +9,20 @@ import { request, messages, AbortSignal } from "../src/api.mjs";
 import { ValidationError } from "../src/errors.mjs";
 
 test("sending a json-rpc request that times out", async (t) => {
-  const delay = 1000;
-  const worker = await createWorker(`
+  const pauseMilliseconds = 1000;
+  const worker = await createWorker(
+    `
     app.post('/', async (req, res) => {
-      await new Promise((resolve) => setTimeout(resolve, ${delay}));
       res.status(200).send("hello world");
     });
-  `);
+  `,
+    { pauseMilliseconds }
+  );
 
-  const timeout = 500;
+  const timeoutMilliseconds = 500;
   const message = {
     options: {
-      timeout,
+      timeout: timeoutMilliseconds,
       url: `http://localhost:${worker.port}`,
     },
     version: messages.version,
@@ -43,20 +45,22 @@ test("sending a json-rpc request that times out", async (t) => {
 });
 
 test("sending an https request that times out", async (t) => {
-  const delay = 1000;
-  const worker = await createWorker(`
+  const pauseMilliseconds = 1000;
+  const worker = await createWorker(
+    `
     app.get('/', async (req, res) => {
-      await new Promise((resolve) => setTimeout(resolve, ${delay}));
       res.status(200).send("hello world");
     });
-  `);
+  `,
+    { pauseMilliseconds }
+  );
 
-  const timeout = 500;
+  const timeoutMilliseconds = 500;
   const message = {
     type: "https",
     version: messages.version,
     options: {
-      timeout,
+      timeout: timeoutMilliseconds,
       url: `http://localhost:${worker.port}`,
       method: "GET",
     },

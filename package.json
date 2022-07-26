@@ -52,10 +52,11 @@
   "devDependencies": {
     "ava": "4.2.0",
     "esmock": "1.7.5",
-    "expressively-mocked-fetch": "0.2.2",
+    "expressively-mocked-fetch": "0.2.3",
     "husky": "7.0.4",
     "lint-staged": "12.3.8",
-    "prettier": "2.6.2"
+    "prettier": "2.6.2",
+    "eth-fun": "0.9.x"
   },
   "dependencies": {
     "@neume-network/message-schema": "0.3.1",
