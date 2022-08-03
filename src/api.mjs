@@ -97,7 +97,7 @@ async function route(message, cb) {
     const { method, params, options } = message;
 
     const { origin } = new URL(options.url);
-    const { rateLimiter, timeout } = endpointStore.get(origin);
+    const { rateLimiter, timeout } = endpointStore.get(origin) ?? {};
     if (rateLimiter) {
       await rateLimiter.removeTokens(1);
     }
@@ -119,7 +119,8 @@ async function route(message, cb) {
     const { url, method, body, headers, timeout } = message.options;
 
     const { origin } = new URL(url);
-    const { rateLimiter, timeout: endpointTimeout } = endpointStore.get(origin);
+    const { rateLimiter, timeout: endpointTimeout } =
+      endpointStore.get(origin) ?? {};
     if (rateLimiter) {
       await rateLimiter.removeTokens(1);
     }
