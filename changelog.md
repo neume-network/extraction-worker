@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.1
+
+- Add `endpoints` property that allows setting an endpoint-specific `timeout`
+  and rate limit
+
 ## 0.5.0
 
 - (breaking) Upon failures in the worker/queue, extraction-worker attempts to
