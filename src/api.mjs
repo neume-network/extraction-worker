@@ -97,13 +97,16 @@ async function route(message, cb) {
     const { method, params, options } = message;
 
     const { origin } = new URL(options.url);
-    const { rateLimiter, timeout } = endpointStore.get(origin) ?? {};
+    const { rateLimiter, timeout: timeoutFromConfig } =
+      endpointStore.get(origin) ?? {};
     if (rateLimiter) {
       await rateLimiter.removeTokens(1);
     }
 
-    if (options.timeout || timeout) {
-      options.signal = AbortSignal.timeout(options.timeout ?? timeout);
+    if (options.timeout || timeoutFromConfig) {
+      options.signal = AbortSignal.timeout(
+        options.timeout ?? timeoutFromConfig
+      );
       delete options.timeout;
     }
 
@@ -116,18 +119,24 @@ async function route(message, cb) {
 
     return cb(null, { ...message, results });
   } else if (type === "https") {
-    const { url, method, body, headers, timeout } = message.options;
+    const {
+      url,
+      method,
+      body,
+      headers,
+      timeout: timeoutFromMsg,
+    } = message.options;
 
     const { origin } = new URL(url);
-    const { rateLimiter, timeout: endpointTimeout } =
+    const { rateLimiter, timeout: timeoutFromConfig } =
       endpointStore.get(origin) ?? {};
     if (rateLimiter) {
       await rateLimiter.removeTokens(1);
     }
 
     let signal;
-    if (timeout || endpointTimeout) {
-      signal = AbortSignal.timeout(timeout ?? endpointTimeout);
+    if (timeoutFromMsg || timeoutFromConfig) {
+      signal = AbortSignal.timeout(timeoutFromMsg ?? timeoutFromConfig);
     }
 
     let data;
