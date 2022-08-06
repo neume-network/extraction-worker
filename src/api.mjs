@@ -1,6 +1,4 @@
 // @format
-import { exit } from "process";
-
 import Ajv from "ajv";
 import fetch from "cross-fetch";
 import {
@@ -14,6 +12,7 @@ import AbortController from "abort-controller";
 import logger from "./logger.mjs";
 import { ValidationError, NotImplementedError } from "./errors.mjs";
 import { translate } from "./eth.mjs";
+import { endpointStore } from "./endpoint_store.mjs";
 
 const log = logger("api");
 const ajv = new Ajv();
@@ -96,13 +95,22 @@ async function route(message, cb) {
 
   if (type === "json-rpc") {
     const { method, params, options } = message;
-    let results;
 
-    if (options.timeout) {
-      options.signal = AbortSignal.timeout(options.timeout);
+    const { origin } = new URL(options.url);
+    const { rateLimiter, timeout: timeoutFromConfig } =
+      endpointStore.get(origin) ?? {};
+    if (rateLimiter) {
+      await rateLimiter.removeTokens(1);
+    }
+
+    if (options.timeout || timeoutFromConfig) {
+      options.signal = AbortSignal.timeout(
+        options.timeout ?? timeoutFromConfig
+      );
       delete options.timeout;
     }
 
+    let results;
     try {
       results = await translate(options, method, params);
     } catch (error) {
@@ -111,11 +119,24 @@ async function route(message, cb) {
 
     return cb(null, { ...message, results });
   } else if (type === "https") {
-    const { url, method, body, headers, timeout } = message.options;
+    const {
+      url,
+      method,
+      body,
+      headers,
+      timeout: timeoutFromMsg,
+    } = message.options;
+
+    const { origin } = new URL(url);
+    const { rateLimiter, timeout: timeoutFromConfig } =
+      endpointStore.get(origin) ?? {};
+    if (rateLimiter) {
+      await rateLimiter.removeTokens(1);
+    }
 
     let signal;
-    if (timeout) {
-      signal = AbortSignal.timeout(timeout);
+    if (timeoutFromMsg || timeoutFromConfig) {
+      signal = AbortSignal.timeout(timeoutFromMsg ?? timeoutFromConfig);
     }
 
     let data;

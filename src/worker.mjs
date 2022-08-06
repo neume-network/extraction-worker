@@ -6,7 +6,7 @@ import Queue from "better-queue";
 
 import logger from "./logger.mjs";
 import { messages } from "./api.mjs";
-import { translate } from "./eth.mjs";
+import { endpointStore, populateEndpointStore } from "./endpoint_store.mjs";
 
 const log = logger("worker");
 
@@ -71,6 +71,8 @@ export function run() {
       workerData.queue.options
     )}`
   );
+  if (workerData.endpoints)
+    populateEndpointStore(endpointStore, workerData.endpoints);
   const queue = new Queue(messages.route, workerData.queue.options);
   queue.on("task_finish", loggingProxy(queue, reply));
   queue.on("task_failed", loggingProxy(queue, panic));

@@ -44,7 +44,7 @@ test("sending a json-rpc request that times out", async (t) => {
   await messages.route(message, cb);
 });
 
-test("sending an https request that times out", async (t) => {
+test("sending an https request timeout through message", async (t) => {
   const pauseMilliseconds = 1000;
   const worker = await createWorker(
     `
@@ -61,6 +61,46 @@ test("sending an https request that times out", async (t) => {
     version: messages.version,
     options: {
       timeout: timeoutMilliseconds,
+      url: `http://localhost:${worker.port}`,
+      method: "GET",
+    },
+    results: null,
+    error: null,
+  };
+
+  t.plan(3);
+  const cb = (err, response) => {
+    t.truthy(err);
+    t.true(err.error.includes("AbortError"));
+    t.falsy(response);
+  };
+  await messages.route(message, cb);
+});
+
+test("sending an https request timeout through config", async (t) => {
+  const pauseMilliseconds = 1000;
+  const worker = await createWorker(
+    `
+    app.get('/', async (req, res) => {
+      res.status(200).send("hello world");
+    });
+  `,
+    { pauseMilliseconds }
+  );
+
+  const endpointStore = new Map();
+  endpointStore.set(`http://localhost:${worker.port}`, { timeout: 500 });
+
+  const { messages } = await esmock("../src/api.mjs", {
+    "../src/endpoint_store.mjs": {
+      endpointStore: endpointStore,
+    },
+  });
+
+  const message = {
+    type: "https",
+    version: messages.version,
+    options: {
       url: `http://localhost:${worker.port}`,
       method: "GET",
     },
