@@ -77,7 +77,7 @@ test("sending an https request timeout through message", async (t) => {
   await messages.route(message, cb);
 });
 
-test.only("sending an https request timeout through config", async (t) => {
+test("sending an https request timeout through config", async (t) => {
   const pauseMilliseconds = 1000;
   const worker = await createWorker(
     `
