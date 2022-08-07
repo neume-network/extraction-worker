@@ -13,7 +13,7 @@ import { messages } from "../src/api.mjs";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const extractorPath = resolve(__dirname, "../test/start.mjs");
 
-test("sending throwing job to worker", async (t) => {
+test("sending a throwing job to worker", async (t) => {
   const workerData = {
     queue: {
       options: {
