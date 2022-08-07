@@ -2,28 +2,9 @@
 import test from "ava";
 import esmock from "esmock";
 
-import Queue from "better-queue";
+import fastq from "fastq";
 
 import { messages } from "../src/api.mjs";
-import { loggingProxy } from "../src/worker.mjs";
-
-test("the case that panic function is called without context", async (t) => {
-  const taskId = "taskId";
-  const error = new Error("error");
-  const stats = "stats";
-  t.plan(1);
-  const { panic } = await esmock("../src/worker.mjs", null, {
-    worker_threads: {
-      parentPort: {
-        postMessage: (message) => {
-          t.is(message, error.toString());
-        },
-      },
-      workerData: {},
-    },
-  });
-  panic(taskId, error, stats);
-});
 
 test("if run returns queue instance", async (t) => {
   const workerData = {
@@ -43,25 +24,7 @@ test("if run returns queue instance", async (t) => {
     },
   });
   const queue = run();
-  t.true(queue instanceof Queue);
-});
-
-test("logging proxy", (t) => {
-  t.plan(3);
-  const taskId = "id";
-  const message = "message";
-  const handlerMock = (arg1, arg2) => {
-    t.is(taskId, arg1);
-    t.is(message, arg2);
-  };
-  const queueMock = {
-    getStats: () => {
-      t.true(true);
-      return "test value";
-    },
-  };
-
-  loggingProxy(queueMock, handlerMock)(taskId, message);
+  t.truthy(queue.getQueue);
 });
 
 test("throw on invalidly formatted message", async (t) => {
@@ -69,6 +32,7 @@ test("throw on invalidly formatted message", async (t) => {
   const workerMock = await esmock("../src/worker.mjs", null, {
     worker_threads: {
       parentPort: {
+        on: () => {}, // noop
         postMessage: (message) => {
           t.is(message.hello, "world");
           t.true(
@@ -78,7 +42,11 @@ test("throw on invalidly formatted message", async (t) => {
         },
       },
       workerData: {
-        concurrency: 1,
+        queue: {
+          options: {
+            concurrency: 1,
+          },
+        },
       },
     },
   });
@@ -86,7 +54,8 @@ test("throw on invalidly formatted message", async (t) => {
   const message = {
     hello: "world",
   };
-  workerMock.messageHandler({})(message);
+  const queue = workerMock.run();
+  workerMock.messageHandler(queue)(message);
 });
 
 test("call exit", async (t) => {

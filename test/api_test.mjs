@@ -35,13 +35,8 @@ test("sending a json-rpc request that times out", async (t) => {
     error: null,
   };
 
-  t.plan(3);
-  const cb = (err, response) => {
-    t.truthy(err);
-    t.true(err.error.includes("AbortError"));
-    t.falsy(response);
-  };
-  await messages.route(message, cb);
+  const response = await messages.route(message);
+  t.true(response.error.includes("AbortError"));
 });
 
 test("sending an https request timeout through message", async (t) => {
@@ -68,13 +63,8 @@ test("sending an https request timeout through message", async (t) => {
     error: null,
   };
 
-  t.plan(3);
-  const cb = (err, response) => {
-    t.truthy(err);
-    t.true(err.error.includes("AbortError"));
-    t.falsy(response);
-  };
-  await messages.route(message, cb);
+  const res = await messages.route(message);
+  t.true(res.error.includes("AbortError"));
 });
 
 test("sending an https request timeout through config", async (t) => {
@@ -108,13 +98,8 @@ test("sending an https request timeout through config", async (t) => {
     error: null,
   };
 
-  t.plan(3);
-  const cb = (err, response) => {
-    t.truthy(err);
-    t.true(err.error.includes("AbortError"));
-    t.falsy(response);
-  };
-  await messages.route(message, cb);
+  const res = await messages.route(message);
+  t.true(res.error.includes("AbortError"));
 });
 
 test("setting a timeout that isn't triggered", async (t) => {
@@ -176,13 +161,8 @@ test("sending invalid json as response", async (t) => {
     error: null,
   };
 
-  t.plan(3);
-  const cb = (err, response) => {
-    t.true(err.error.includes("Encountered error when trying to parse"));
-    t.falsy(response);
-    t.truthy(err);
-  };
-  await messages.route(message, cb);
+  const res = await messages.route(message);
+  t.true(res.error.includes("Encountered error when trying to parse"));
 });
 
 test("failing https request with status and body", async (t) => {
@@ -204,16 +184,11 @@ test("failing https request with status and body", async (t) => {
     error: null,
   };
 
-  t.plan(6);
-  const cb = (err, response) => {
-    t.true(err.error.includes(message.options.url));
-    t.true(err.error.includes(message.options.method));
-    t.true(err.error.includes(httpMessage));
-    t.true(err.error.includes(httpStatus));
-    t.falsy(response);
-    t.truthy(err);
-  };
-  await messages.route(message, cb);
+  const res = await messages.route(message);
+  t.true(res.error.includes(message.options.url));
+  t.true(res.error.includes(message.options.method));
+  t.true(res.error.includes(httpMessage));
+  t.true(res.error.includes(httpStatus));
 });
 
 test("failing https request with status", async (t) => {
@@ -234,13 +209,8 @@ test("failing https request with status", async (t) => {
     error: null,
   };
 
-  t.plan(3);
-  const cb = (err, response) => {
-    t.true(err.error.includes(httpStatus));
-    t.falsy(response);
-    t.truthy(err);
-  };
-  await messages.route(message, cb);
+  const res = await messages.route(message);
+  t.true(res.error.includes(httpStatus));
 });
 
 // TODO: Sandbox request with fetchMock
@@ -256,13 +226,8 @@ test("failing https request", async (t) => {
     error: null,
   };
 
-  t.plan(3);
-  const cb = (err, response) => {
-    t.true(err.error.includes("FetchError"));
-    t.falsy(response);
-    t.truthy(err);
-  };
-  await messages.route(message, cb);
+  const res = await messages.route(message);
+  t.true(res.error.includes("FetchError"));
 });
 
 // TODO: Sandbox request with fetchMock
@@ -281,14 +246,11 @@ test("executing https job", async (t) => {
     error: null,
   };
 
-  t.plan(4);
-  const cb = (err, response) => {
-    t.truthy(response);
-    t.truthy(response.results.data);
-    t.truthy(response.results.data.nfts);
-    t.true(response.results.data.nfts.length > 0);
-  };
-  await messages.route(message, cb);
+  const response = await messages.route(message);
+  t.truthy(response);
+  t.truthy(response.results.data);
+  t.truthy(response.results.data.nfts);
+  t.true(response.results.data.nfts.length > 0);
 });
 
 test("fail to execute a graphql job", async (t) => {
@@ -305,13 +267,8 @@ test("fail to execute a graphql job", async (t) => {
     error: null,
   };
 
-  t.plan(3);
-  const cb = (err, response) => {
-    t.falsy(response);
-    t.true(typeof err.error === "string");
-    t.truthy(err);
-  };
-  await messages.route(message, cb);
+  const res = await messages.route(message);
+  t.true(typeof res.error === "string");
 });
 
 test("executing a graphql job", async (t) => {
@@ -328,15 +285,11 @@ test("executing a graphql job", async (t) => {
     error: null,
   };
 
-  t.plan(5);
-  const cb = (err, response) => {
-    t.falsy(err);
-    t.truthy(response);
-    t.truthy(response.results.data);
-    t.truthy(response.results.data.nfts);
-    t.true(response.results.data.nfts.length > 0);
-  };
-  await messages.route(message, cb);
+  const response = await messages.route(message);
+  t.truthy(response);
+  t.truthy(response.results.data);
+  t.truthy(response.results.data.nfts);
+  t.true(response.results.data.nfts.length > 0);
 });
 
 test("validating version of message", (t) => {
@@ -401,12 +354,9 @@ test("sending a json-rpc job", async (t) => {
     results: null,
   };
 
-  t.plan(2);
-  const cb = (err, res) => {
-    t.falsy(err);
-    t.truthy(res);
-  };
-  await messages.route(message, cb);
+  const res = await messages.route(message);
+  t.falsy(res.error);
+  t.truthy(res.results);
 });
 
 test("handling failed job", async (t) => {
@@ -435,5 +385,7 @@ test("handling failed job", async (t) => {
     t.truthy(err);
     t.falsy(res);
   };
-  await apiMock.messages.route(message, cb);
+  const res = await apiMock.messages.route(message);
+  t.truthy(res.error);
+  t.true(res.error.includes("MockError"));
 });

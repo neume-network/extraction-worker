@@ -90,7 +90,7 @@ export const AbortSignal = {
   },
 };
 
-async function route(message, cb) {
+async function route(message) {
   const { type } = message;
 
   if (type === "json-rpc") {
@@ -114,10 +114,10 @@ async function route(message, cb) {
     try {
       results = await translate(options, method, params);
     } catch (error) {
-      return cb({ ...message, error: error.toString() });
+      return { ...message, error: error.toString() };
     }
 
-    return cb(null, { ...message, results });
+    return { ...message, results };
   } else if (type === "https") {
     const {
       url,
@@ -143,9 +143,9 @@ async function route(message, cb) {
     try {
       data = await request(url, method, body, headers, signal);
     } catch (error) {
-      return cb({ ...message, error: error.toString() });
+      return { ...message, error: error.toString() };
     }
-    return cb(null, { ...message, results: data });
+    return { ...message, results: data };
   } else if (type === "graphql") {
     const { url, body, headers } = message.options;
     const method = "POST";
@@ -154,17 +154,17 @@ async function route(message, cb) {
     try {
       data = await request(url, method, body, headers);
     } catch (error) {
-      return cb({ ...message, error: error.toString() });
+      return { ...message, error: error.toString() };
     }
 
     if (data.errors) {
       // NOTE: For now, we're only returning the first error message.
-      return cb({ ...message, error: data.errors[0].message });
+      return { ...message, error: data.errors[0].message };
     }
 
-    return cb(null, { ...message, results: data });
+    return { ...message, results: data };
   } else {
-    return cb({ ...message, error: new NotImplementedError().toString() });
+    return { ...message, error: new NotImplementedError().toString() };
   }
 }
 

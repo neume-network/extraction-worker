@@ -2,7 +2,7 @@
 import { workerData, parentPort } from "worker_threads";
 import { exit } from "process";
 
-import Queue from "better-queue";
+import fastq from "fastq";
 
 import logger from "./logger.mjs";
 import { messages } from "./api.mjs";
@@ -10,19 +10,13 @@ import { endpointStore, populateEndpointStore } from "./endpoint_store.mjs";
 
 const log = logger("worker");
 
-export function panic(taskId, error, stats) {
-  // NOTE: See: https://github.com/diamondio/better-queue/issues/82
-  let message;
-  if (error && error instanceof Error) {
-    message = error.toString();
-  } else if (error && error instanceof Object) {
-    message = { ...error };
-  }
+export function panic(error, message) {
   log(
-    `Panic in queue with taskId "${taskId}", error "${JSON.stringify(
+    `Panic in queue with task "${JSON.stringify(
       message
-    )}" and stats "${JSON.stringify(stats)}"`
+    )}", error "${error.toString()}"`
   );
+  message.error = error.toString();
   if (message) {
     parentPort.postMessage(message);
   } else {
@@ -34,34 +28,37 @@ export function panic(taskId, error, stats) {
   }
 }
 
-export function reply(taskId, message) {
-  parentPort.postMessage(message);
-}
-
+let finished = 0;
+let errors = 0;
 export function messageHandler(queue) {
-  return (message) => {
+  return async (message) => {
     try {
       messages.validate(message);
     } catch (error) {
-      return panic("no-task-id-error-thrown-from-messageHandler", {
-        ...message,
-        error: error.toString(),
-      });
+      return panic(error, message);
     }
 
     if (message.type === "exit") {
       log(`Received exit signal; shutting down`);
       exit(0);
     } else {
-      queue.push(message);
-    }
-  };
-}
+      let result;
+      try {
+        result = await queue.push(message);
+        if (result.error) {
+          errors++;
+        } else {
+          finished++;
+        }
+        log(`Success: ${finished} Errors: ${errors}`);
+      } catch (error) {
+        errors++;
+        log(`Success: ${finished} Errors: ${errors}`);
+        return panic(error, message);
+      }
 
-export function loggingProxy(queue, handler) {
-  return (...args) => {
-    log(`Queue stats: ${JSON.stringify(queue.getStats())}`);
-    return handler(...args);
+      parentPort.postMessage(result);
+    }
   };
 }
 
@@ -71,11 +68,13 @@ export function run() {
       workerData.queue.options
     )}`
   );
-  if (workerData.endpoints)
+  if (workerData.endpoints) {
     populateEndpointStore(endpointStore, workerData.endpoints);
-  const queue = new Queue(messages.route, workerData.queue.options);
-  queue.on("task_finish", loggingProxy(queue, reply));
-  queue.on("task_failed", loggingProxy(queue, panic));
+  }
+  const queue = fastq.promise(
+    messages.route,
+    workerData.queue.options.concurrent
+  );
   parentPort.on("message", messageHandler(queue));
   return queue;
 }
