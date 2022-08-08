@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.2
+
+- Switch from better-queue to fastq
+
 ## 0.5.1
 
 - Add `endpoints` property that allows setting an endpoint-specific `timeout`
