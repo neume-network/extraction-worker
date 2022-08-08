@@ -1,6 +1,14 @@
 # Changelog
 
-## 0.5.2
+## 0.6.0
+
+- (breaking) Switch from better-queue to fastq. Whereas extraction worker users
+  pinning a version below 0.6.0 had to expect string-only errors in return
+  messages, this deviation was now fixed through fastq that always provides the
+  message and a potential error message in case of failure. The [`function panic(...)`](https://github.com/neume-network/extraction-worker/blob/2426513292ed27cd994e97c3fc5f271b77dc0007/src/worker.mjs#L13)
+  implementation shows it.
+
+## 0.5.2 (mistake and later unpublished)
 
 - Switch from better-queue to fastq
 
