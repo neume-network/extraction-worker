@@ -1,7 +1,9 @@
 //@format
 import { workerData, parentPort } from "worker_threads";
 import { exit } from "process";
-
+import Ajv from "ajv";
+import addFormats from "ajv-formats";
+import { config as configSchema } from "@neume-network/schema";
 import fastq from "fastq";
 
 import logger from "./logger.mjs";
@@ -62,11 +64,23 @@ export function messageHandler(queue) {
   };
 }
 
+export function validateConfig(config) {
+  const ajv = new Ajv();
+  addFormats(ajv);
+  const check = ajv.compile(configSchema);
+  const valid = check(config);
+  if (!valid) {
+    log(check.errors);
+    throw new Error("Received invalid config");
+  }
+}
+
 export function run() {
+  validateConfig(workerData);
   log(
     `Starting as worker thread with queue options: "${JSON.stringify(
-      workerData.queue.options
-    )}`
+      workerData
+    )}"`
   );
   if (workerData.endpoints) {
     populateEndpointStore(endpointStore, workerData.endpoints);

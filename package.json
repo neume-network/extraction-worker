@@ -52,16 +52,18 @@
   "devDependencies": {
     "ava": "4.2.0",
     "esmock": "1.7.5",
+    "eth-fun": "0.9.x",
     "expressively-mocked-fetch": "0.2.3",
     "husky": "7.0.4",
     "lint-staged": "12.3.8",
-    "prettier": "2.6.2",
-    "eth-fun": "0.9.x"
+    "prettier": "2.6.2"
   },
   "dependencies": {
     "@neume-network/message-schema": "0.3.1",
+    "@neume-network/schema": "0.4.0",
     "abort-controller": "3.0.0",
     "ajv": "8.11.0",
+    "ajv-formats": "2.1.1",
     "cross-fetch": "3.1.5",
     "debug": "4.3.4",
     "dotenv": "16.0.0",
