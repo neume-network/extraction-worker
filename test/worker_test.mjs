@@ -2,15 +2,14 @@
 import test from "ava";
 import esmock from "esmock";
 
-import fastq from "fastq";
-
 import { messages } from "../src/api.mjs";
+import { validateConfig } from "../src/worker.mjs";
 
 test("if run returns queue instance", async (t) => {
   const workerData = {
     queue: {
       options: {
-        concurrency: 1,
+        concurrent: 1,
       },
     },
   };
@@ -44,7 +43,7 @@ test("throw on invalidly formatted message", async (t) => {
       workerData: {
         queue: {
           options: {
-            concurrency: 1,
+            concurrent: 1,
           },
         },
       },
@@ -70,4 +69,24 @@ test("call exit", async (t) => {
     type: "exit",
     version: messages.version,
   });
+});
+
+test("validateConfig should not throw error for valid config", (t) => {
+  t.notThrows(() =>
+    validateConfig({
+      queue: {
+        options: {
+          concurrent: 10,
+        },
+      },
+    })
+  );
+});
+
+test("validateConfig should throw error for invalid config", (t) => {
+  t.throws(() =>
+    validateConfig({
+      queue: { options: "" },
+    })
+  );
 });

@@ -17,7 +17,7 @@ test("sending a throwing job to worker", async (t) => {
   const workerData = {
     queue: {
       options: {
-        concurrency: 1,
+        concurrent: 1,
       },
     },
   };
@@ -49,7 +49,7 @@ test("shutting down extractor worker", async (t) => {
   const workerData = {
     queue: {
       options: {
-        concurrency: 1,
+        concurrent: 1,
       },
     },
   };
@@ -65,7 +65,7 @@ test("running script in worker queue", async (t) => {
   const workerData = {
     queue: {
       options: {
-        concurrency: 1,
+        concurrent: 1,
       },
     },
   };
