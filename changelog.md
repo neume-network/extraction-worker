@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.1
+
+- `workerData` is now evaluated using
+  [@neume-network/schema@0.5.0](https://github.com/neume-network/schema/blob/main/src/schema.mjs#L4-L49).
+
 ## 0.6.0
 
 - (breaking) Switch from better-queue to fastq. Whereas extraction worker users
