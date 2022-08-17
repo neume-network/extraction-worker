@@ -4,20 +4,13 @@
   "description": "The purpose of the neume-network/core Extraction Worker (short: \"EW\") is to parallelize retrieving distributed information from various data sources by abstracting away the complexity of scaling processes accross a distributed system such as e.g. multiple node.js Worker threads.",
   "main": "./src/worker.mjs",
   "ava": {
-    "files": [
-      "!test/start.mjs"
-    ],
-    "nodeArguments": [
-      "--loader=esmock",
-      "--no-warnings"
-    ],
+    "files": ["!test/start.mjs"],
+    "nodeArguments": ["--loader=esmock", "--no-warnings"],
     "environmentVariables": {
-      "DEBUG": "neume-network-extraction-worker:*",
+      "DEBUG": "neume-network-*",
       "RPC_HTTP_HOST": "https://cloudflare-eth.com"
     },
-    "require": [
-      "dotenv/config"
-    ]
+    "require": ["dotenv/config"]
   },
   "lint-staged": {
     "*.{mjs,js,css,md}": "prettier --write"

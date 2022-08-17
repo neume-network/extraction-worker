@@ -9,7 +9,7 @@ test("if run returns queue instance", async (t) => {
   const workerData = {
     queue: {
       options: {
-        concurrency: 1,
+        concurrent: 1,
       },
     },
   };
@@ -43,7 +43,7 @@ test("throw on invalidly formatted message", async (t) => {
       workerData: {
         queue: {
           options: {
-            concurrency: 1,
+            concurrent: 1,
           },
         },
       },
