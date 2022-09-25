@@ -389,3 +389,77 @@ test("handling failed job", async (t) => {
   t.truthy(res.error);
   t.true(res.error.includes("MockError"));
 });
+
+test("sending a valid ipfs request", async (t) => {
+  const worker = await createWorker(
+    `
+    app.get('*', async (req, res) => {
+      res.status(200).send("{}");
+    });
+  `
+  );
+
+  const message = {
+    options: {
+      url: "ipfs://Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu",
+      gateway: `http://localhost:${worker.port}/ipfs/`,
+    },
+    version: messages.version,
+    type: "ipfs",
+    commissioner: "test",
+    results: null,
+    error: null,
+  };
+
+  t.notThrows(() => {
+    messages.validate(message);
+  });
+
+  const res = await messages.route(message);
+  t.falsy(res.error);
+  t.truthy(res.results);
+
+  worker.process.terminate();
+});
+
+test("sending ipfs request that will timeout", async (t) => {
+  const worker = await createWorker(
+    `
+    app.get('*', async (req, res) => {
+      res.status(200).send("{}");
+    });
+  `,
+    { pauseMilliseconds: 1000 }
+  );
+
+  const message = {
+    options: {
+      url: "ipfs://Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu",
+      gateway: `http://localhost:${worker.port}/ipfs/`,
+      timeout: 50,
+    },
+    version: messages.version,
+    type: "ipfs",
+    results: null,
+  };
+
+  const res = await messages.route(message);
+  t.true(res.error.includes("AbortError"));
+
+  worker.process.terminate();
+});
+
+test("sending ipfs request with invalid url", async (t) => {
+  const message = {
+    options: {
+      url: "ipfs:Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu",
+      gateway: `http://localhost/ipfs/`,
+    },
+    version: messages.version,
+    type: "ipfs",
+    results: null,
+  };
+
+  const res = await messages.route(message);
+  t.true(res.error.includes("Invalid IPFS URL"));
+});

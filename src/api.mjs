@@ -1,11 +1,6 @@
 // @format
 import Ajv from "ajv";
-import {
-  exit as exitMsg,
-  https,
-  jsonrpc,
-  graphql,
-} from "@neume-network/message-schema";
+import { workerMessage } from "@neume-network/schema";
 import AbortController from "abort-controller";
 
 import logger from "./logger.mjs";
@@ -18,11 +13,7 @@ const log = logger("api");
 const ajv = new Ajv();
 const version = "0.0.1";
 
-const schema = {
-  oneOf: [graphql, jsonrpc, exitMsg, https],
-};
-
-const check = ajv.compile(schema);
+const check = ajv.compile(workerMessage);
 function validate(value) {
   const valid = check(value);
   if (!valid) {
@@ -124,6 +115,38 @@ async function route(message) {
     }
 
     return { ...message, results: data };
+  } else if (type === "ipfs") {
+    let { url, gateway, timeout: timeoutFromMsg } = message.options;
+
+    const IPFSIANAScheme = "ipfs://";
+
+    if (url.startsWith(IPFSIANAScheme)) {
+      url = url.replace(IPFSIANAScheme, gateway);
+
+      const { origin } = new URL(url);
+      const { rateLimiter, timeout: timeoutFromConfig } =
+        endpointStore.get(origin) ?? {};
+
+      if (rateLimiter) {
+        await rateLimiter.removeTokens(1);
+      }
+
+      let signal;
+      if (timeoutFromMsg || timeoutFromConfig) {
+        signal = AbortSignal.timeout(timeoutFromMsg ?? timeoutFromConfig);
+      }
+
+      let data;
+      try {
+        data = await request(url, "GET", null, null, signal);
+      } catch (error) {
+        return { ...message, error: error.toString() };
+      }
+
+      return { ...message, results: data };
+    } else {
+      return { ...message, error: "Invalid IPFS URL" };
+    }
   } else {
     return { ...message, error: new NotImplementedError().toString() };
   }
