@@ -393,7 +393,39 @@ test("handling failed job", async (t) => {
 test("sending a valid ipfs request", async (t) => {
   const worker = await createWorker(
     `
-    app.get('*', async (req, res) => {
+    app.get('/ipfs/Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu', async (req, res) => {
+      res.status(200).json({hello: "world"});
+    });
+  `
+  );
+
+  const message = {
+    options: {
+      url: "ipfs://Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu/",
+      gateway: `http://localhost:${worker.port}/ipfs/`,
+    },
+    version: messages.version,
+    type: "ipfs",
+    commissioner: "test",
+    results: null,
+    error: null,
+  };
+
+  t.notThrows(() => {
+    messages.validate(message);
+  });
+
+  const res = await messages.route(message);
+  t.falsy(res.error);
+  t.deepEqual(res.results, { hello: "world" });
+
+  worker.process.terminate();
+});
+
+test("sending a valid ipfs request with path", async (t) => {
+  const worker = await createWorker(
+    `
+    app.get('/ipfs/Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu/wiki/index.html/', async (req, res) => {
       res.status(200).send("{}");
     });
   `
@@ -401,7 +433,7 @@ test("sending a valid ipfs request", async (t) => {
 
   const message = {
     options: {
-      url: "ipfs://Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu",
+      url: "ipfs://Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu/wiki/index.html",
       gateway: `http://localhost:${worker.port}/ipfs/`,
     },
     version: messages.version,
@@ -462,4 +494,19 @@ test("sending ipfs request with invalid url", async (t) => {
 
   const res = await messages.route(message);
   t.true(res.error.includes("Invalid IPFS URL"));
+});
+
+test("sending ipfs request with invalid cid", async (t) => {
+  const message = {
+    options: {
+      url: "ipfs://CZe7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu",
+      gateway: `http://localhost/ipfs/`,
+    },
+    version: messages.version,
+    type: "ipfs",
+    results: null,
+  };
+
+  const res = await messages.route(message);
+  t.true(res.error.includes("Invalid CID"));
 });

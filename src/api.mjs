@@ -2,6 +2,7 @@
 import Ajv from "ajv";
 import { workerMessage } from "@neume-network/schema";
 import AbortController from "abort-controller";
+import { CID } from "multiformats/cid";
 
 import logger from "./logger.mjs";
 import { ValidationError, NotImplementedError } from "./errors.mjs";
@@ -118,42 +119,50 @@ async function route(message) {
   } else if (type === "ipfs") {
     let { url, gateway, timeout: timeoutFromMsg } = message.options;
 
-    const IPFSIANAScheme = "ipfs://";
+    const nativeIPFSPattern = /^(ipfs:\/\/)([^/?#]+)(.*)/;
+    const match = url.match(nativeIPFSPattern);
 
-    if (url.startsWith(IPFSIANAScheme)) {
-      url = url.replace(IPFSIANAScheme, gateway);
+    if (match === null) return { ...message, error: "Invalid IPFS URL" };
+    const [_, protocol, hash, path] = match;
 
-      const { origin } = new URL(url);
-      const { rateLimiter, timeout: timeoutFromConfig } =
-        endpointStore.get(origin) ?? {};
+    if (!protocol) return { ...message, error: "Invalid protcol" };
+    if (!hash) return { ...message, error: "Could not find CID" };
 
-      if (rateLimiter) {
-        await rateLimiter.removeTokens(1);
-      }
-
-      let signal;
-      if (timeoutFromMsg || timeoutFromConfig) {
-        signal = AbortSignal.timeout(timeoutFromMsg ?? timeoutFromConfig);
-      }
-
-      let data;
-      try {
-        data = await request(url, "GET", null, null, signal);
-      } catch (error) {
-        return { ...message, error: error.toString() };
-      }
-
-      return { ...message, results: data };
-    } else {
-      return { ...message, error: "Invalid IPFS URL" };
+    try {
+      CID.parse(hash);
+    } catch (error) {
+      return { ...message, error: "Invalid CID" };
     }
+
+    url = `${gateway}${hash}${path}`; // gateway will contain a trailing slash
+
+    const { origin } = new URL(url);
+    const { rateLimiter, timeout: timeoutFromConfig } =
+      endpointStore.get(origin) ?? {};
+
+    if (rateLimiter) {
+      await rateLimiter.removeTokens(1);
+    }
+
+    let signal;
+    if (timeoutFromMsg || timeoutFromConfig) {
+      signal = AbortSignal.timeout(timeoutFromMsg ?? timeoutFromConfig);
+    }
+
+    let data;
+    try {
+      data = await request(url, "GET", null, null, signal);
+    } catch (error) {
+      return { ...message, error: error.toString() };
+    }
+
+    return { ...message, results: data };
   } else {
     return { ...message, error: new NotImplementedError().toString() };
   }
 }
 
 export const messages = {
-  schema,
   route,
   validate,
   version,
