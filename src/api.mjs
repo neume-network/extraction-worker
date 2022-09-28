@@ -68,16 +68,19 @@ export async function request(url, method, body, headers, signal) {
     );
   }
 
-  let data;
-  try {
-    data = JSON.parse(answer);
-  } catch (err) {
-    throw new Error(
-      `Encountered error when trying to parse JSON body result: "${answer}", error: "${err.toString()}"`
-    );
+  if (results.headers.get("Content-Type")?.toLowerCase().includes("json")) {
+    let data;
+    try {
+      data = JSON.parse(answer);
+    } catch (err) {
+      throw new Error(
+        `Encountered error when trying to parse JSON body result: "${answer}", error: "${err.toString()}"`
+      );
+    }
+    return data;
   }
 
-  return data;
+  return answer;
 }
 
 // NOTE: `AbortSignal.timeout` isn't yet supported:
