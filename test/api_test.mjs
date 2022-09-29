@@ -162,7 +162,7 @@ test("sending invalid json as response", async (t) => {
   };
 
   const res = await messages.route(message);
-  t.is(res.results, "hello world");
+  t.true(res.error.includes("Encountered error when trying to parse"));
 });
 
 test("failing https request with status and body", async (t) => {
