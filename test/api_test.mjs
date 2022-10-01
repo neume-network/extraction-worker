@@ -5,7 +5,7 @@ import test from "ava";
 import esmock from "esmock";
 import createWorker from "expressively-mocked-fetch";
 
-import { request, messages, AbortSignal } from "../src/api.mjs";
+import { messages, AbortSignal } from "../src/api.mjs";
 import { ValidationError } from "../src/errors.mjs";
 
 test("sending a json-rpc request that times out", async (t) => {
