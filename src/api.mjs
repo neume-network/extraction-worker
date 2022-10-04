@@ -151,7 +151,9 @@ async function route(message) {
 
     let data;
     try {
-      data = await request(url, "GET", null, null, signal);
+      const body = null;
+      const headers = null;
+      data = await request(url, "GET", body, headers, signal);
     } catch (error) {
       return { ...message, error: error.toString() };
     }
