@@ -411,9 +411,7 @@ test("sending a valid ipfs request", async (t) => {
     error: null,
   };
 
-  t.notThrows(() => {
-    messages.validate(message);
-  });
+  t.true(messages.validate(message));
 
   const res = await messages.route(message);
   t.falsy(res.error);
@@ -443,9 +441,7 @@ test("sending a valid ipfs request with path", async (t) => {
     error: null,
   };
 
-  t.notThrows(() => {
-    messages.validate(message);
-  });
+  t.true(messages.validate(message));
 
   const res = await messages.route(message);
   t.falsy(res.error);
