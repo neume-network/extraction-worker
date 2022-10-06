@@ -401,7 +401,7 @@ test("sending a valid ipfs request", async (t) => {
 
   const message = {
     options: {
-      url: "ipfs://Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu/",
+      uri: "ipfs://Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu/",
       gateway: `http://localhost:${worker.port}/ipfs/`,
     },
     version: messages.version,
@@ -431,7 +431,7 @@ test("sending a valid ipfs request with path", async (t) => {
 
   const message = {
     options: {
-      url: "ipfs://Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu/wiki/index.html",
+      uri: "ipfs://Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu/wiki/index.html",
       gateway: `http://localhost:${worker.port}/ipfs/`,
     },
     version: messages.version,
@@ -462,7 +462,7 @@ test("sending ipfs request that will timeout", async (t) => {
 
   const message = {
     options: {
-      url: "ipfs://Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu",
+      uri: "ipfs://Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu",
       gateway: `http://localhost:${worker.port}/ipfs/`,
       timeout: 50,
     },
@@ -480,7 +480,7 @@ test("sending ipfs request that will timeout", async (t) => {
 test("sending ipfs request with invalid url", async (t) => {
   const message = {
     options: {
-      url: "ipfs:Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu",
+      uri: "ipfs:Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu",
       gateway: `http://localhost/ipfs/`,
     },
     version: messages.version,
@@ -495,7 +495,7 @@ test("sending ipfs request with invalid url", async (t) => {
 test("sending ipfs request with invalid cid", async (t) => {
   const message = {
     options: {
-      url: "ipfs://CZe7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu",
+      uri: "ipfs://CZe7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu",
       gateway: `http://localhost/ipfs/`,
     },
     version: messages.version,

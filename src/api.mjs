@@ -117,10 +117,10 @@ async function route(message) {
 
     return { ...message, results: data };
   } else if (type === "ipfs") {
-    let { url, gateway, timeout: timeoutFromMsg } = message.options;
+    let { uri, gateway, timeout: timeoutFromMsg } = message.options;
 
     const nativeIPFSPattern = /^(ipfs:\/\/)([^/?#]+)(.*)/;
-    const match = url.match(nativeIPFSPattern);
+    const match = uri.match(nativeIPFSPattern);
 
     if (match === null) return { ...message, error: "Invalid IPFS URL" };
     const [_, protocol, hash, path] = match;
@@ -134,9 +134,9 @@ async function route(message) {
       return { ...message, error: "Invalid CID" };
     }
 
-    url = `${gateway}${hash}${path}`; // gateway will contain a trailing slash
+    uri = `${gateway}${hash}${path}`; // gateway will contain a trailing slash
 
-    const { origin } = new URL(url);
+    const { origin } = new URL(uri);
     const { rateLimiter, timeout: timeoutFromConfig } =
       endpointStore.get(origin) ?? {};
 
@@ -153,7 +153,7 @@ async function route(message) {
     try {
       const body = null;
       const headers = null;
-      data = await request(url, "GET", body, headers, signal);
+      data = await request(uri, "GET", body, headers, signal);
     } catch (error) {
       return { ...message, error: error.toString() };
     }
