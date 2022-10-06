@@ -107,6 +107,32 @@ async function route(message) {
       return { ...message, error: error.toString() };
     }
     return { ...message, results: data };
+  } else if (type === "arweave") {
+    const { uri, timeout: timeoutFromMsg } = message.options;
+
+    const ARWEAVE = "https://arweave.net";
+    const url = `${ARWEAVE}/${uri.split("://").pop()}`;
+    const method = "GET";
+
+    const { origin } = new URL(url);
+    const { rateLimiter, timeout: timeoutFromConfig } =
+      endpointStore.get(origin) ?? {};
+    if (rateLimiter) {
+      await rateLimiter.removeTokens(1);
+    }
+
+    let signal;
+    if (timeoutFromMsg || timeoutFromConfig) {
+      signal = AbortSignal.timeout(timeoutFromMsg ?? timeoutFromConfig);
+    }
+
+    let data;
+    try {
+      data = await request(url, method, null, null, signal);
+    } catch (error) {
+      return { ...message, error: error.toString() };
+    }
+    return { ...message, results: data };
   } else if (type === "graphql") {
     const { url, body, headers } = message.options;
     const method = "POST";

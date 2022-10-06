@@ -389,3 +389,18 @@ test("handling failed job", async (t) => {
   t.truthy(res.error);
   t.true(res.error.includes("MockError"));
 });
+
+test("sending a arweave message", async (t) => {
+  const message = {
+    type: "arweave",
+    version: messages.version,
+    options: {
+      uri: "ar://ltmVC0dpe7_KxFHj0-S7mdvXSfmcJOec4_OfjwSzLRk/1"
+    },
+    results: null,
+    error: null,
+  };
+
+  const res = await messages.route(message);
+  t.is(JSON.stringify(res.results), '{"animation_url":"ar://13x70jy8BhfbC7_Dvkptidyg7TJEMvpoEZV34PIn2Ek","artist":"Dot","artwork":{"mimeType":"image/png","uri":"ar://73AuO6WpSwqQTOzj-l5EIbkzfquIS1RDnlJroavLf24","nft":null},"attributes":[{"trait_type":"Make Me Believe","value":"Song Edition"}],"bpm":124,"description":"This song started from a quick voice memo I had recorded on my phone yesterday, and I wanted to see if it was possible to turn it into a fully-produced song live on my twitch stream. \\n\\n\\"Make Me Believe\\" was written, recorded, produced, mixed, mastered and released in less than 24 hours, and you can watch the production stream replay here: https://www.twitch.tv/dotmvsic","duration":238,"external_url":"https://www.sound.xyz/dot/make-me-believe","genre":"House","image":"ar://73AuO6WpSwqQTOzj-l5EIbkzfquIS1RDnlJroavLf24","license":null,"lyrics":{"text":"You remind me\\nTo take some time to breathe\\nYou can be human\\nAnd it\'s okay to feel\\nSay it out loud\\n\\nTake some time to breathe\\nYou can be human\\nAnd it\'s okay to feel\\n\\nYou make me believe\\nYou make me believe\\nBelieve in Love again ","nft":null},"key":null,"locationCreated":"us","losslessAudio":"ar://13x70jy8BhfbC7_Dvkptidyg7TJEMvpoEZV34PIn2Ek","mimeType":"audio/wave","name":"Make Me Believe #1","title":"Make Me Believe","trackNumber":1,"version":"sound-edition-20220222","credits":null,"isrc":null,"originalReleaseDate":null,"project":null,"publisher":null,"recordLabel":null,"tags":null,"visualizer":null}');
+});
