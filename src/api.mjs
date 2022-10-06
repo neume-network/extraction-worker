@@ -1,12 +1,8 @@
 // @format
 import Ajv from "ajv";
-import {
-  exit as exitMsg,
-  https,
-  jsonrpc,
-  graphql,
-} from "@neume-network/message-schema";
+import { workerMessage } from "@neume-network/schema";
 import AbortController from "abort-controller";
+import { CID } from "multiformats/cid";
 
 import logger from "./logger.mjs";
 import { ValidationError, NotImplementedError } from "./errors.mjs";
@@ -18,11 +14,7 @@ const log = logger("api");
 const ajv = new Ajv();
 const version = "0.0.1";
 
-const schema = {
-  oneOf: [graphql, jsonrpc, exitMsg, https],
-};
-
-const check = ajv.compile(schema);
+const check = ajv.compile(workerMessage);
 function validate(value) {
   const valid = check(value);
   if (!valid) {
@@ -124,13 +116,55 @@ async function route(message) {
     }
 
     return { ...message, results: data };
+  } else if (type === "ipfs") {
+    let { uri, gateway, timeout: timeoutFromMsg } = message.options;
+
+    const nativeIPFSPattern = /^(ipfs:\/\/)([^/?#]+)(.*)/;
+    const match = uri.match(nativeIPFSPattern);
+
+    if (match === null) return { ...message, error: "Invalid IPFS URL" };
+    const [_, protocol, hash, path] = match;
+
+    if (!protocol) return { ...message, error: "Invalid protcol" };
+    if (!hash) return { ...message, error: "Could not find CID" };
+
+    try {
+      CID.parse(hash);
+    } catch (error) {
+      return { ...message, error: "Invalid CID" };
+    }
+
+    uri = `${gateway}${hash}${path}`; // gateway will contain a trailing slash
+
+    const { origin } = new URL(uri);
+    const { rateLimiter, timeout: timeoutFromConfig } =
+      endpointStore.get(origin) ?? {};
+
+    if (rateLimiter) {
+      await rateLimiter.removeTokens(1);
+    }
+
+    let signal;
+    if (timeoutFromMsg || timeoutFromConfig) {
+      signal = AbortSignal.timeout(timeoutFromMsg ?? timeoutFromConfig);
+    }
+
+    let data;
+    try {
+      const body = null;
+      const headers = null;
+      data = await request(uri, "GET", body, headers, signal);
+    } catch (error) {
+      return { ...message, error: error.toString() };
+    }
+
+    return { ...message, results: data };
   } else {
     return { ...message, error: new NotImplementedError().toString() };
   }
 }
 
 export const messages = {
-  schema,
   route,
   validate,
   version,

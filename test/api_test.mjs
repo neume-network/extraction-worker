@@ -389,3 +389,120 @@ test("handling failed job", async (t) => {
   t.truthy(res.error);
   t.true(res.error.includes("MockError"));
 });
+
+test("sending a valid ipfs request", async (t) => {
+  const worker = await createWorker(
+    `
+    app.get('/ipfs/Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu', async (req, res) => {
+      res.status(200).json({hello: "world"});
+    });
+  `
+  );
+
+  const message = {
+    options: {
+      uri: "ipfs://Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu/",
+      gateway: `http://localhost:${worker.port}/ipfs/`,
+    },
+    version: messages.version,
+    type: "ipfs",
+    commissioner: "test",
+    results: null,
+    error: null,
+  };
+
+  t.true(messages.validate(message));
+
+  const res = await messages.route(message);
+  t.falsy(res.error);
+  t.deepEqual(res.results, { hello: "world" });
+
+  worker.process.terminate();
+});
+
+test("sending a valid ipfs request with path", async (t) => {
+  const worker = await createWorker(
+    `
+    app.get('/ipfs/Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu/wiki/index.html/', async (req, res) => {
+      res.status(200).send("{}");
+    });
+  `
+  );
+
+  const message = {
+    options: {
+      uri: "ipfs://Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu/wiki/index.html",
+      gateway: `http://localhost:${worker.port}/ipfs/`,
+    },
+    version: messages.version,
+    type: "ipfs",
+    commissioner: "test",
+    results: null,
+    error: null,
+  };
+
+  t.true(messages.validate(message));
+
+  const res = await messages.route(message);
+  t.falsy(res.error);
+  t.truthy(res.results);
+
+  worker.process.terminate();
+});
+
+test("sending ipfs request that will timeout", async (t) => {
+  const worker = await createWorker(
+    `
+    app.get('*', async (req, res) => {
+      res.status(200).send("{}");
+    });
+  `,
+    { pauseMilliseconds: 1000 }
+  );
+
+  const message = {
+    options: {
+      uri: "ipfs://Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu",
+      gateway: `http://localhost:${worker.port}/ipfs/`,
+      timeout: 50,
+    },
+    version: messages.version,
+    type: "ipfs",
+    results: null,
+  };
+
+  const res = await messages.route(message);
+  t.true(res.error.includes("AbortError"));
+
+  worker.process.terminate();
+});
+
+test("sending ipfs request with invalid url", async (t) => {
+  const message = {
+    options: {
+      uri: "ipfs:Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu",
+      gateway: `http://localhost/ipfs/`,
+    },
+    version: messages.version,
+    type: "ipfs",
+    results: null,
+  };
+
+  const res = await messages.route(message);
+  t.true(res.error.includes("Invalid IPFS URL"));
+});
+
+test("sending ipfs request with invalid cid", async (t) => {
+  const message = {
+    options: {
+      uri: "ipfs://CZe7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu",
+      gateway: `http://localhost/ipfs/`,
+    },
+    version: messages.version,
+    type: "ipfs",
+    results: null,
+  };
+
+  const res = await messages.route(message);
+  t.true(res.error.includes("Invalid CID"));
+});
