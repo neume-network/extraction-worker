@@ -108,11 +108,9 @@ async function route(message) {
     }
     return { ...message, results: data };
   } else if (type === "arweave") {
-    const { uri, timeout: timeoutFromMsg } = message.options;
+    const { uri, gateway, timeout: timeoutFromMsg } = message.options;
 
-    const ARWEAVE = "https://arweave.net";
-    const url = `${ARWEAVE}/${uri.split("://").pop()}`;
-    const method = "GET";
+    const url = `${gateway}/${uri.split("://").pop()}`;
 
     const { origin } = new URL(url);
     const { rateLimiter, timeout: timeoutFromConfig } =
@@ -128,7 +126,10 @@ async function route(message) {
 
     let data;
     try {
-      data = await request(url, method, null, null, signal);
+      const method = "GET";
+      const body = null;
+      const headers = null;
+      data = await request(url, method, body, headers, signal);
     } catch (error) {
       return { ...message, error: error.toString() };
     }
