@@ -9,11 +9,13 @@ import { ValidationError, NotImplementedError } from "./errors.mjs";
 import { translate } from "./eth.mjs";
 import { endpointStore } from "./endpoint_store.mjs";
 import { request } from "./request.mjs";
+import addFormats from "ajv-formats";
 
 const log = logger("api");
 const ajv = new Ajv();
 const version = "0.0.1";
 
+addFormats(ajv);
 const check = ajv.compile(workerMessage);
 function validate(value) {
   const valid = check(value);
