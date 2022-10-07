@@ -35,7 +35,6 @@ test("sending a throwing job to worker", async (t) => {
     params: [
       "0xed14c3386aea0c5b39ffea466997ff13606eaedf03fe7f431326531f35809d1d",
     ],
-    results: null,
   };
 
   w.postMessage(message);
@@ -83,7 +82,6 @@ test("running script in worker queue", async (t) => {
     params: [
       "0xed14c3386aea0c5b39ffea466997ff13606eaedf03fe7f431326531f35809d1d",
     ],
-    results: null,
   };
 
   w.postMessage(message);

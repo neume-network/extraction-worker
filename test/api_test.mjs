@@ -31,8 +31,6 @@ test("sending a json-rpc request that times out", async (t) => {
     params: [
       "0xed14c3386aea0c5b39ffea466997ff13606eaedf03fe7f431326531f35809d1d",
     ],
-    results: null,
-    error: null,
   };
 
   const response = await messages.route(message);
@@ -59,8 +57,6 @@ test("sending an https request timeout through message", async (t) => {
       url: `http://localhost:${worker.port}`,
       method: "GET",
     },
-    results: null,
-    error: null,
   };
 
   const res = await messages.route(message);
@@ -94,8 +90,6 @@ test("sending an https request timeout through config", async (t) => {
       url: `http://localhost:${worker.port}`,
       method: "GET",
     },
-    results: null,
-    error: null,
   };
 
   const res = await messages.route(message);
@@ -137,8 +131,6 @@ test("sending a graphql message", (t) => {
         query: `{ nfts(first: 1, skip: 0) { id } }`,
       }),
     },
-    results: null,
-    error: null,
   };
 
   t.true(messages.validate(message));
@@ -157,8 +149,6 @@ test("sending invalid json as response", async (t) => {
       url: `http://localhost:${worker.port}`,
       method: "GET",
     },
-    results: null,
-    error: null,
   };
 
   const res = await messages.route(message);
@@ -180,8 +170,6 @@ test("failing https request with status and body", async (t) => {
       url: `http://localhost:${worker.port}`,
       method: "GET",
     },
-    results: null,
-    error: null,
   };
 
   const res = await messages.route(message);
@@ -205,8 +193,6 @@ test("failing https request with status", async (t) => {
       url: `http://localhost:${worker.port}`,
       method: "GET",
     },
-    results: null,
-    error: null,
   };
 
   const res = await messages.route(message);
@@ -222,8 +208,6 @@ test("failing https request", async (t) => {
       url: "https://thisdomaindoesntrespond.com",
       method: "GET",
     },
-    results: null,
-    error: null,
   };
 
   const res = await messages.route(message);
@@ -242,8 +226,6 @@ test("executing https job", async (t) => {
         query: `{ nfts(first: 1000) { id } }`,
       }),
     },
-    results: null,
-    error: null,
   };
 
   const response = await messages.route(message);
@@ -263,8 +245,6 @@ test("fail to execute a graphql job", async (t) => {
         query: `nonsense query`,
       }),
     },
-    results: null,
-    error: null,
   };
 
   const res = await messages.route(message);
@@ -281,8 +261,6 @@ test("executing a graphql job", async (t) => {
         query: `{ nfts(first: 1000) { id } }`,
       }),
     },
-    results: null,
-    error: null,
   };
 
   const response = await messages.route(message);
@@ -319,7 +297,6 @@ test("validating schema `type` prop", (t) => {
     type: "json-rpc",
     method: "eth_getBlockByNumber",
     params: [],
-    results: null,
   };
   t.true(messages.validate(message2));
 });
@@ -333,8 +310,6 @@ test("validating http job schema", (t) => {
       url: "https://example.com",
       method: "GET",
     },
-    results: null,
-    error: null,
   };
 
   t.true(messages.validate(message));
@@ -351,7 +326,6 @@ test("sending a json-rpc job", async (t) => {
     params: [
       "0xed14c3386aea0c5b39ffea466997ff13606eaedf03fe7f431326531f35809d1d",
     ],
-    results: null,
   };
 
   const res = await messages.route(message);
@@ -378,7 +352,6 @@ test("handling failed job", async (t) => {
     params: [
       "0xed14c3386aea0c5b39ffea466997ff13606eaedf03fe7f431326531f35809d1d",
     ],
-    results: null,
   };
 
   const cb = async (err, res) => {
@@ -407,8 +380,6 @@ test("sending a valid ipfs request", async (t) => {
     version: messages.version,
     type: "ipfs",
     commissioner: "test",
-    results: null,
-    error: null,
   };
 
   t.true(messages.validate(message));
@@ -437,8 +408,6 @@ test("sending a valid ipfs request with path", async (t) => {
     version: messages.version,
     type: "ipfs",
     commissioner: "test",
-    results: null,
-    error: null,
   };
 
   t.true(messages.validate(message));
@@ -468,7 +437,6 @@ test("sending ipfs request that will timeout", async (t) => {
     },
     version: messages.version,
     type: "ipfs",
-    results: null,
   };
 
   const res = await messages.route(message);
@@ -485,7 +453,6 @@ test("sending ipfs request with invalid url", async (t) => {
     },
     version: messages.version,
     type: "ipfs",
-    results: null,
   };
 
   const res = await messages.route(message);
@@ -500,9 +467,25 @@ test("sending ipfs request with invalid cid", async (t) => {
     },
     version: messages.version,
     type: "ipfs",
-    results: null,
   };
 
   const res = await messages.route(message);
   t.true(res.error.includes("Invalid CID"));
+});
+
+test("sending a arweave message", async (t) => {
+  const message = {
+    type: "arweave",
+    version: messages.version,
+    options: {
+      uri: "ar://ltmVC0dpe7_KxFHj0-S7mdvXSfmcJOec4_OfjwSzLRk/1",
+      gateway: "https://arweave.net",
+    },
+  };
+
+  const res = await messages.route(message);
+  t.is(
+    JSON.stringify(res.results),
+    '{"animation_url":"ar://13x70jy8BhfbC7_Dvkptidyg7TJEMvpoEZV34PIn2Ek","artist":"Dot","artwork":{"mimeType":"image/png","uri":"ar://73AuO6WpSwqQTOzj-l5EIbkzfquIS1RDnlJroavLf24","nft":null},"attributes":[{"trait_type":"Make Me Believe","value":"Song Edition"}],"bpm":124,"description":"This song started from a quick voice memo I had recorded on my phone yesterday, and I wanted to see if it was possible to turn it into a fully-produced song live on my twitch stream. \\n\\n\\"Make Me Believe\\" was written, recorded, produced, mixed, mastered and released in less than 24 hours, and you can watch the production stream replay here: https://www.twitch.tv/dotmvsic","duration":238,"external_url":"https://www.sound.xyz/dot/make-me-believe","genre":"House","image":"ar://73AuO6WpSwqQTOzj-l5EIbkzfquIS1RDnlJroavLf24","license":null,"lyrics":{"text":"You remind me\\nTo take some time to breathe\\nYou can be human\\nAnd it\'s okay to feel\\nSay it out loud\\n\\nTake some time to breathe\\nYou can be human\\nAnd it\'s okay to feel\\n\\nYou make me believe\\nYou make me believe\\nBelieve in Love again ","nft":null},"key":null,"locationCreated":"us","losslessAudio":"ar://13x70jy8BhfbC7_Dvkptidyg7TJEMvpoEZV34PIn2Ek","mimeType":"audio/wave","name":"Make Me Believe #1","title":"Make Me Believe","trackNumber":1,"version":"sound-edition-20220222","credits":null,"isrc":null,"originalReleaseDate":null,"project":null,"publisher":null,"recordLabel":null,"tags":null,"visualizer":null}'
+  );
 });

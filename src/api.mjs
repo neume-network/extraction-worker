@@ -9,11 +9,13 @@ import { ValidationError, NotImplementedError } from "./errors.mjs";
 import { translate } from "./eth.mjs";
 import { endpointStore } from "./endpoint_store.mjs";
 import { request } from "./request.mjs";
+import addFormats from "ajv-formats";
 
 const log = logger("api");
 const ajv = new Ajv();
 const version = "0.0.1";
 
+addFormats(ajv);
 const check = ajv.compile(workerMessage);
 function validate(value) {
   const valid = check(value);
@@ -94,6 +96,33 @@ async function route(message) {
 
     let data;
     try {
+      data = await request(url, method, body, headers, signal);
+    } catch (error) {
+      return { ...message, error: error.toString() };
+    }
+    return { ...message, results: data };
+  } else if (type === "arweave") {
+    const { uri, gateway, timeout: timeoutFromMsg } = message.options;
+
+    const url = `${gateway}/${uri.split("ar://").pop()}`;
+
+    const { origin } = new URL(url);
+    const { rateLimiter, timeout: timeoutFromConfig } =
+      endpointStore.get(origin) ?? {};
+    if (rateLimiter) {
+      await rateLimiter.removeTokens(1);
+    }
+
+    let signal;
+    if (timeoutFromMsg || timeoutFromConfig) {
+      signal = AbortSignal.timeout(timeoutFromMsg ?? timeoutFromConfig);
+    }
+
+    let data;
+    try {
+      const method = "GET";
+      const body = null;
+      const headers = null;
       data = await request(url, method, body, headers, signal);
     } catch (error) {
       return { ...message, error: error.toString() };
