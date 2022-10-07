@@ -31,8 +31,6 @@ test("sending a json-rpc request that times out", async (t) => {
     params: [
       "0xed14c3386aea0c5b39ffea466997ff13606eaedf03fe7f431326531f35809d1d",
     ],
-    results: null,
-    error: null,
   };
 
   const response = await messages.route(message);
@@ -59,8 +57,6 @@ test("sending an https request timeout through message", async (t) => {
       url: `http://localhost:${worker.port}`,
       method: "GET",
     },
-    results: null,
-    error: null,
   };
 
   const res = await messages.route(message);
@@ -94,8 +90,6 @@ test("sending an https request timeout through config", async (t) => {
       url: `http://localhost:${worker.port}`,
       method: "GET",
     },
-    results: null,
-    error: null,
   };
 
   const res = await messages.route(message);
@@ -137,8 +131,6 @@ test("sending a graphql message", (t) => {
         query: `{ nfts(first: 1, skip: 0) { id } }`,
       }),
     },
-    results: null,
-    error: null,
   };
 
   t.true(messages.validate(message));
@@ -157,8 +149,6 @@ test("sending invalid json as response", async (t) => {
       url: `http://localhost:${worker.port}`,
       method: "GET",
     },
-    results: null,
-    error: null,
   };
 
   const res = await messages.route(message);
@@ -180,8 +170,6 @@ test("failing https request with status and body", async (t) => {
       url: `http://localhost:${worker.port}`,
       method: "GET",
     },
-    results: null,
-    error: null,
   };
 
   const res = await messages.route(message);
@@ -205,8 +193,6 @@ test("failing https request with status", async (t) => {
       url: `http://localhost:${worker.port}`,
       method: "GET",
     },
-    results: null,
-    error: null,
   };
 
   const res = await messages.route(message);
@@ -222,8 +208,6 @@ test("failing https request", async (t) => {
       url: "https://thisdomaindoesntrespond.com",
       method: "GET",
     },
-    results: null,
-    error: null,
   };
 
   const res = await messages.route(message);
@@ -242,8 +226,6 @@ test("executing https job", async (t) => {
         query: `{ nfts(first: 1000) { id } }`,
       }),
     },
-    results: null,
-    error: null,
   };
 
   const response = await messages.route(message);
@@ -263,8 +245,6 @@ test("fail to execute a graphql job", async (t) => {
         query: `nonsense query`,
       }),
     },
-    results: null,
-    error: null,
   };
 
   const res = await messages.route(message);
@@ -281,8 +261,6 @@ test("executing a graphql job", async (t) => {
         query: `{ nfts(first: 1000) { id } }`,
       }),
     },
-    results: null,
-    error: null,
   };
 
   const response = await messages.route(message);
@@ -319,7 +297,6 @@ test("validating schema `type` prop", (t) => {
     type: "json-rpc",
     method: "eth_getBlockByNumber",
     params: [],
-    results: null,
   };
   t.true(messages.validate(message2));
 });
@@ -333,8 +310,6 @@ test("validating http job schema", (t) => {
       url: "https://example.com",
       method: "GET",
     },
-    results: null,
-    error: null,
   };
 
   t.true(messages.validate(message));
@@ -351,7 +326,6 @@ test("sending a json-rpc job", async (t) => {
     params: [
       "0xed14c3386aea0c5b39ffea466997ff13606eaedf03fe7f431326531f35809d1d",
     ],
-    results: null,
   };
 
   const res = await messages.route(message);
@@ -378,7 +352,6 @@ test("handling failed job", async (t) => {
     params: [
       "0xed14c3386aea0c5b39ffea466997ff13606eaedf03fe7f431326531f35809d1d",
     ],
-    results: null,
   };
 
   const cb = async (err, res) => {
@@ -407,8 +380,6 @@ test("sending a valid ipfs request", async (t) => {
     version: messages.version,
     type: "ipfs",
     commissioner: "test",
-    results: null,
-    error: null,
   };
 
   t.true(messages.validate(message));
@@ -437,8 +408,6 @@ test("sending a valid ipfs request with path", async (t) => {
     version: messages.version,
     type: "ipfs",
     commissioner: "test",
-    results: null,
-    error: null,
   };
 
   t.true(messages.validate(message));
@@ -468,7 +437,6 @@ test("sending ipfs request that will timeout", async (t) => {
     },
     version: messages.version,
     type: "ipfs",
-    results: null,
   };
 
   const res = await messages.route(message);
@@ -485,7 +453,6 @@ test("sending ipfs request with invalid url", async (t) => {
     },
     version: messages.version,
     type: "ipfs",
-    results: null,
   };
 
   const res = await messages.route(message);
@@ -500,7 +467,6 @@ test("sending ipfs request with invalid cid", async (t) => {
     },
     version: messages.version,
     type: "ipfs",
-    results: null,
   };
 
   const res = await messages.route(message);
@@ -515,8 +481,6 @@ test("sending a arweave message", async (t) => {
       uri: "ar://ltmVC0dpe7_KxFHj0-S7mdvXSfmcJOec4_OfjwSzLRk/1",
       gateway: "https://arweave.net",
     },
-    results: null,
-    error: null,
   };
 
   const res = await messages.route(message);
