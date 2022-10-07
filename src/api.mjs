@@ -102,7 +102,7 @@ async function route(message) {
   } else if (type === "arweave") {
     const { uri, gateway, timeout: timeoutFromMsg } = message.options;
 
-    const url = `${gateway}/${uri.split("://").pop()}`;
+    const url = `${gateway}/${uri.split("ar://").pop()}`;
 
     const { origin } = new URL(url);
     const { rateLimiter, timeout: timeoutFromConfig } =
