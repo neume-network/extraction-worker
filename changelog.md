@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.7.0
+
+- (breaking) For unparsable JSON, we now return the text response as a
+  `results` in case the HTTP header `Content-Type` includes `json`.
+- Add `type: ipfs` worker message handling
+- Add `type: arweave` worker message handling
+
 ## 0.6.1
 
 - `workerData` is now evaluated using
