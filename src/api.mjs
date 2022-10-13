@@ -102,7 +102,7 @@ async function route(message) {
     }
     return { ...message, results: data };
   } else if (type === "arweave") {
-    const { uri, gateway, timeout: timeoutFromMsg } = message.options;
+    const { headers, uri, gateway, timeout: timeoutFromMsg } = message.options;
 
     const url = `${gateway}/${uri.split("ar://").pop()}`;
 
@@ -122,7 +122,6 @@ async function route(message) {
     try {
       const method = "GET";
       const body = null;
-      const headers = null;
       data = await request(url, method, body, headers, signal);
     } catch (error) {
       return { ...message, error: error.toString() };
@@ -146,7 +145,7 @@ async function route(message) {
 
     return { ...message, results: data };
   } else if (type === "ipfs") {
-    let { uri, gateway, timeout: timeoutFromMsg } = message.options;
+    let { headers, uri, gateway, timeout: timeoutFromMsg } = message.options;
 
     const nativeIPFSPattern = /^(ipfs:\/\/)([^/?#]+)(.*)/;
     const match = uri.match(nativeIPFSPattern);
@@ -181,7 +180,6 @@ async function route(message) {
     let data;
     try {
       const body = null;
-      const headers = null;
       data = await request(uri, "GET", body, headers, signal);
     } catch (error) {
       return { ...message, error: error.toString() };
