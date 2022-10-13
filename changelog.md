@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.1
+
+- Pass `headers` in ipfs message to gateway
+
 ## 0.7.0
 
 - (breaking) For unparsable JSON, we now return the text response as a
