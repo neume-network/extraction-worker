@@ -7,7 +7,6 @@ import { CID } from "multiformats/cid";
 import logger from "./logger.mjs";
 import { ValidationError, NotImplementedError } from "./errors.mjs";
 import { translate } from "./eth.mjs";
-import { endpointStore } from "./endpoint_store.mjs";
 import { request } from "./request.mjs";
 import addFormats from "ajv-formats";
 
@@ -53,7 +52,7 @@ async function route(message) {
 
     const { origin } = new URL(options.url);
     const { rateLimiter, timeout: timeoutFromConfig } =
-      endpointStore.get(origin) ?? {};
+      this.endpointStore.get(origin) ?? {};
     if (rateLimiter) {
       await rateLimiter.removeTokens(1);
     }
@@ -84,7 +83,7 @@ async function route(message) {
 
     const { origin } = new URL(url);
     const { rateLimiter, timeout: timeoutFromConfig } =
-      endpointStore.get(origin) ?? {};
+      this.endpointStore.get(origin) ?? {};
     if (rateLimiter) {
       await rateLimiter.removeTokens(1);
     }
@@ -108,7 +107,7 @@ async function route(message) {
 
     const { origin } = new URL(url);
     const { rateLimiter, timeout: timeoutFromConfig } =
-      endpointStore.get(origin) ?? {};
+      this.endpointStore.get(origin) ?? {};
     if (rateLimiter) {
       await rateLimiter.removeTokens(1);
     }
@@ -166,7 +165,7 @@ async function route(message) {
 
     const { origin } = new URL(uri);
     const { rateLimiter, timeout: timeoutFromConfig } =
-      endpointStore.get(origin) ?? {};
+      this.endpointStore.get(origin) ?? {};
 
     if (rateLimiter) {
       await rateLimiter.removeTokens(1);

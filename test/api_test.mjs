@@ -32,8 +32,10 @@ test("sending a json-rpc request that times out", async (t) => {
       "0xed14c3386aea0c5b39ffea466997ff13606eaedf03fe7f431326531f35809d1d",
     ],
   };
+  const endpointStore = new Map();
 
-  const response = await messages.route(message);
+  const response = await messages.route.apply({ endpointStore }, [message]);
+  console.log(response);
   t.true(response.error.includes("AbortError"));
 });
 
@@ -58,8 +60,9 @@ test("sending an https request timeout through message", async (t) => {
       method: "GET",
     },
   };
+  const endpointStore = new Map();
 
-  const res = await messages.route(message);
+  const res = await messages.route.apply({ endpointStore }, [message]);
   t.true(res.error.includes("AbortError"));
 });
 
@@ -77,12 +80,6 @@ test("sending an https request timeout through config", async (t) => {
   const endpointStore = new Map();
   endpointStore.set(`http://localhost:${worker.port}`, { timeout: 500 });
 
-  const { messages } = await esmock("../src/api.mjs", {
-    "../src/endpoint_store.mjs": {
-      endpointStore: endpointStore,
-    },
-  });
-
   const message = {
     type: "https",
     version: messages.version,
@@ -92,7 +89,7 @@ test("sending an https request timeout through config", async (t) => {
     },
   };
 
-  const res = await messages.route(message);
+  const res = await messages.route.apply({ endpointStore }, [message]);
   t.true(res.error.includes("AbortError"));
 });
 
@@ -150,8 +147,9 @@ test("sending invalid json as response", async (t) => {
       method: "GET",
     },
   };
+  const endpointStore = new Map();
 
-  const res = await messages.route(message);
+  const res = await messages.route.apply({ endpointStore }, [message]);
   t.is(res.results, "hello world");
 });
 
@@ -171,8 +169,9 @@ test("failing https request with status and body", async (t) => {
       method: "GET",
     },
   };
+  const endpointStore = new Map();
 
-  const res = await messages.route(message);
+  const res = await messages.route.apply({ endpointStore }, [message]);
   t.true(res.error.includes(message.options.url));
   t.true(res.error.includes(message.options.method));
   t.true(res.error.includes(httpMessage));
@@ -194,8 +193,9 @@ test("failing https request with status", async (t) => {
       method: "GET",
     },
   };
+  const endpointStore = new Map();
 
-  const res = await messages.route(message);
+  const res = await messages.route.apply({ endpointStore }, [message]);
   t.true(res.error.includes(httpStatus));
 });
 
@@ -209,8 +209,9 @@ test("failing https request", async (t) => {
       method: "GET",
     },
   };
+  const endpointStore = new Map();
 
-  const res = await messages.route(message);
+  const res = await messages.route.apply({ endpointStore }, [message]);
   t.true(res.error.includes("FetchError"));
 });
 
@@ -227,8 +228,9 @@ test("executing https job", async (t) => {
       }),
     },
   };
+  const endpointStore = new Map();
 
-  const response = await messages.route(message);
+  const response = await messages.route.apply({ endpointStore }, [message]);
   t.truthy(response);
   t.truthy(response.results.data);
   t.truthy(response.results.data.nfts);
@@ -246,8 +248,9 @@ test("fail to execute a graphql job", async (t) => {
       }),
     },
   };
+  const endpointStore = new Map();
 
-  const res = await messages.route(message);
+  const res = await messages.route.apply({ endpointStore }, [message]);
   t.true(typeof res.error === "string");
 });
 
@@ -262,8 +265,9 @@ test("executing a graphql job", async (t) => {
       }),
     },
   };
+  const endpointStore = new Map();
 
-  const response = await messages.route(message);
+  const response = await messages.route.apply({ endpointStore }, [message]);
   t.truthy(response);
   t.truthy(response.results.data);
   t.truthy(response.results.data.nfts);
@@ -327,13 +331,15 @@ test("sending a json-rpc job", async (t) => {
       "0xed14c3386aea0c5b39ffea466997ff13606eaedf03fe7f431326531f35809d1d",
     ],
   };
+  const endpointStore = new Map();
 
-  const res = await messages.route(message);
+  const res = await messages.route.apply({ endpointStore }, [message]);
   t.falsy(res.error);
   t.truthy(res.results);
 });
 
 test("handling failed job", async (t) => {
+  const endpointStore = new Map();
   const apiMock = await esmock("../src/api.mjs", {
     "../src/eth.mjs": {
       translate: async () => {
@@ -354,11 +360,7 @@ test("handling failed job", async (t) => {
     ],
   };
 
-  const cb = async (err, res) => {
-    t.truthy(err);
-    t.falsy(res);
-  };
-  const res = await apiMock.messages.route(message);
+  const res = await apiMock.messages.route.apply({ endpointStore }, [message]);
   t.truthy(res.error);
   t.true(res.error.includes("MockError"));
 });
@@ -383,8 +385,9 @@ test("sending a valid ipfs request", async (t) => {
   };
 
   t.true(messages.validate(message));
+  const endpointStore = new Map();
 
-  const res = await messages.route(message);
+  const res = await messages.route.apply({ endpointStore }, [message]);
   t.falsy(res.error);
   t.deepEqual(res.results, { hello: "world" });
 
@@ -411,8 +414,9 @@ test("sending a valid ipfs request with path", async (t) => {
   };
 
   t.true(messages.validate(message));
+  const endpointStore = new Map();
 
-  const res = await messages.route(message);
+  const res = await messages.route.apply({ endpointStore }, [message]);
   t.falsy(res.error);
   t.truthy(res.results);
 
@@ -438,8 +442,9 @@ test("sending ipfs request that will timeout", async (t) => {
     version: messages.version,
     type: "ipfs",
   };
+  const endpointStore = new Map();
 
-  const res = await messages.route(message);
+  const res = await messages.route.apply({ endpointStore }, [message]);
   t.true(res.error.includes("AbortError"));
 
   worker.process.terminate();
@@ -454,8 +459,9 @@ test("sending ipfs request with invalid url", async (t) => {
     version: messages.version,
     type: "ipfs",
   };
+  const endpointStore = new Map();
 
-  const res = await messages.route(message);
+  const res = await messages.route.apply({ endpointStore }, [message]);
   t.true(res.error.includes("Invalid IPFS URL"));
 });
 
@@ -468,8 +474,9 @@ test("sending ipfs request with invalid cid", async (t) => {
     version: messages.version,
     type: "ipfs",
   };
+  const endpointStore = new Map();
 
-  const res = await messages.route(message);
+  const res = await messages.route.apply({ endpointStore }, [message]);
   t.true(res.error.includes("Invalid CID"));
 });
 
@@ -482,8 +489,9 @@ test("sending a arweave message", async (t) => {
       gateway: "https://arweave.net",
     },
   };
+  const endpointStore = new Map();
 
-  const res = await messages.route(message);
+  const res = await messages.route.apply({ endpointStore }, [message]);
   t.is(
     JSON.stringify(res.results),
     '{"animation_url":"ar://13x70jy8BhfbC7_Dvkptidyg7TJEMvpoEZV34PIn2Ek","artist":"Dot","artwork":{"mimeType":"image/png","uri":"ar://73AuO6WpSwqQTOzj-l5EIbkzfquIS1RDnlJroavLf24","nft":null},"attributes":[{"trait_type":"Make Me Believe","value":"Song Edition"}],"bpm":124,"description":"This song started from a quick voice memo I had recorded on my phone yesterday, and I wanted to see if it was possible to turn it into a fully-produced song live on my twitch stream. \\n\\n\\"Make Me Believe\\" was written, recorded, produced, mixed, mastered and released in less than 24 hours, and you can watch the production stream replay here: https://www.twitch.tv/dotmvsic","duration":238,"external_url":"https://www.sound.xyz/dot/make-me-believe","genre":"House","image":"ar://73AuO6WpSwqQTOzj-l5EIbkzfquIS1RDnlJroavLf24","license":null,"lyrics":{"text":"You remind me\\nTo take some time to breathe\\nYou can be human\\nAnd it\'s okay to feel\\nSay it out loud\\n\\nTake some time to breathe\\nYou can be human\\nAnd it\'s okay to feel\\n\\nYou make me believe\\nYou make me believe\\nBelieve in Love again ","nft":null},"key":null,"locationCreated":"us","losslessAudio":"ar://13x70jy8BhfbC7_Dvkptidyg7TJEMvpoEZV34PIn2Ek","mimeType":"audio/wave","name":"Make Me Believe #1","title":"Make Me Believe","trackNumber":1,"version":"sound-edition-20220222","credits":null,"isrc":null,"originalReleaseDate":null,"project":null,"publisher":null,"recordLabel":null,"tags":null,"visualizer":null}'
