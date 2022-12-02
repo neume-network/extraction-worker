@@ -3,6 +3,7 @@
   "version": "0.7.1",
   "description": "The purpose of the neume-network/core Extraction Worker (short: \"EW\") is to parallelize retrieving distributed information from various data sources by abstracting away the complexity of scaling processes accross a distributed system such as e.g. multiple node.js Worker threads.",
   "main": "./src/worker.mjs",
+  "types": "./src/worker.d.ts",
   "ava": {
     "files": [
       "!test/start.mjs"
@@ -59,7 +60,7 @@
     "prettier": "2.6.2"
   },
   "dependencies": {
-    "@neume-network/schema": "0.8.1",
+    "@neume-network/schema": "file:../music-os-schema",
     "abort-controller": "3.0.0",
     "ajv": "8.11.0",
     "ajv-formats": "2.1.1",
