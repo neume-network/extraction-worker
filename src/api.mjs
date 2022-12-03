@@ -79,6 +79,7 @@ async function route(message) {
       body,
       headers,
       timeout: timeoutFromMsg,
+      retry: retryConfig,
     } = message.options;
 
     const { origin } = new URL(url);
@@ -95,13 +96,19 @@ async function route(message) {
 
     let data;
     try {
-      data = await request(url, method, body, headers, signal);
+      data = await request(url, method, body, headers, signal, retryConfig);
     } catch (error) {
       return { ...message, error: error.toString() };
     }
     return { ...message, results: data };
   } else if (type === "arweave") {
-    const { headers, uri, gateway, timeout: timeoutFromMsg } = message.options;
+    const {
+      headers,
+      uri,
+      gateway,
+      timeout: timeoutFromMsg,
+      retry: retryConfig,
+    } = message.options;
 
     const url = `${gateway}/${uri.split("ar://").pop()}`;
 
@@ -121,18 +128,18 @@ async function route(message) {
     try {
       const method = "GET";
       const body = null;
-      data = await request(url, method, body, headers, signal);
+      data = await request(url, method, body, headers, signal, retryConfig);
     } catch (error) {
       return { ...message, error: error.toString() };
     }
     return { ...message, results: data };
   } else if (type === "graphql") {
-    const { url, body, headers } = message.options;
+    const { url, body, headers, retry: retryConfig } = message.options;
     const method = "POST";
 
     let data;
     try {
-      data = await request(url, method, body, headers);
+      data = await request(url, method, body, headers, null, retryConfig);
     } catch (error) {
       return { ...message, error: error.toString() };
     }
@@ -144,7 +151,13 @@ async function route(message) {
 
     return { ...message, results: data };
   } else if (type === "ipfs") {
-    let { headers, uri, gateway, timeout: timeoutFromMsg } = message.options;
+    let {
+      headers,
+      uri,
+      gateway,
+      timeout: timeoutFromMsg,
+      retry: retryConfig,
+    } = message.options;
 
     const nativeIPFSPattern = /^(ipfs:\/\/)([^/?#]+)(.*)/;
     const match = uri.match(nativeIPFSPattern);
@@ -179,7 +192,7 @@ async function route(message) {
     let data;
     try {
       const body = null;
-      data = await request(uri, "GET", body, headers, signal);
+      data = await request(uri, "GET", body, headers, signal, retryConfig);
     } catch (error) {
       return { ...message, error: error.toString() };
     }
