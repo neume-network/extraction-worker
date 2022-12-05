@@ -1,6 +1,7 @@
 import test from "ava";
 import esmock from "esmock";
 import createWorker from "expressively-mocked-fetch";
+import AbortController from "abort-controller";
 import { Response } from "cross-fetch";
 
 import { request } from "../src/request.mjs";
