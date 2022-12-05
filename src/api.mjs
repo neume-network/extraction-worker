@@ -44,12 +44,19 @@ export const AbortSignal = {
   },
 };
 
+const randomItem = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
 async function route(message) {
   const { type } = message;
 
   if (type === "json-rpc") {
     const { method, params, options } = message;
 
+    // TODO: This modifies the original URL. This approach should be
+    // removed later. It will require changes down to the eth-fun level.
+    options.url = Array.isArray(options.url)
+      ? randomItem(options.url)
+      : options.url;
     const { origin } = new URL(options.url);
     const { rateLimiter, timeout: timeoutFromConfig } =
       this.endpointStore.get(origin) ?? {};
@@ -74,7 +81,6 @@ async function route(message) {
     return { ...message, results };
   } else if (type === "https") {
     const {
-      url,
       method,
       body,
       headers,
@@ -82,6 +88,9 @@ async function route(message) {
       retry: retryConfig,
     } = message.options;
 
+    const url = Array.isArray(message.options.url)
+      ? randomItem(message.options.url)
+      : message.options.url;
     const { origin } = new URL(url);
     const { rateLimiter, timeout: timeoutFromConfig } =
       this.endpointStore.get(origin) ?? {};
@@ -105,11 +114,13 @@ async function route(message) {
     const {
       headers,
       uri,
-      gateway,
       timeout: timeoutFromMsg,
       retry: retryConfig,
     } = message.options;
 
+    const gateway = Array.isArray(message.options.gateway)
+      ? randomItem(message.options.gateway)
+      : message.options.gateway;
     const url = `${gateway}/${uri.split("ar://").pop()}`;
 
     const { origin } = new URL(url);
@@ -134,7 +145,10 @@ async function route(message) {
     }
     return { ...message, results: data };
   } else if (type === "graphql") {
-    const { url, body, headers, retry: retryConfig } = message.options;
+    const { body, headers, retry: retryConfig } = message.options;
+    const url = Array.isArray(message.options.url)
+      ? randomItem(message.options.url)
+      : message.options.url;
     const method = "POST";
 
     let data;
@@ -154,11 +168,13 @@ async function route(message) {
     let {
       headers,
       uri,
-      gateway,
       timeout: timeoutFromMsg,
       retry: retryConfig,
     } = message.options;
 
+    const gateway = Array.isArray(message.options.gateway)
+      ? randomItem(message.options.gateway)
+      : message.options.gateway;
     const nativeIPFSPattern = /^(ipfs:\/\/)([^/?#]+)(.*)/;
     const match = uri.match(nativeIPFSPattern);
 
