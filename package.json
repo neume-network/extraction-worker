@@ -59,7 +59,7 @@
     "prettier": "2.6.2"
   },
   "dependencies": {
-    "@neume-network/schema": "file:../music-os-schema",
+    "@neume-network/schema": "github:neume-network/schema",
     "abort-controller": "3.0.0",
     "ajv": "8.11.0",
     "ajv-formats": "2.1.1",
