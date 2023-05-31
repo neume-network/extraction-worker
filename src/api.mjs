@@ -34,16 +34,6 @@ function validate(value) {
   return true;
 }
 
-// NOTE: `AbortSignal.timeout` isn't yet supported:
-// https://github.com/mysticatea/abort-controller/issues/35
-export const AbortSignal = {
-  timeout: function (value) {
-    const controller = new AbortController();
-    setTimeout(() => controller.abort(), value);
-    return controller.signal;
-  },
-};
-
 async function route(message) {
   const { type } = message;
 
@@ -57,12 +47,7 @@ async function route(message) {
       await rateLimiter.removeTokens(1);
     }
 
-    if (options.timeout || timeoutFromConfig) {
-      options.signal = AbortSignal.timeout(
-        options.timeout ?? timeoutFromConfig
-      );
-      delete options.timeout;
-    }
+    options.timeout = options.timeout ?? timeoutFromConfig;
 
     let results;
     try {
@@ -89,14 +74,10 @@ async function route(message) {
       await rateLimiter.removeTokens(1);
     }
 
-    let signal;
-    if (timeoutFromMsg || timeoutFromConfig) {
-      signal = AbortSignal.timeout(timeoutFromMsg ?? timeoutFromConfig);
-    }
-
+    const timeout = timeoutFromMsg ?? timeoutFromConfig;
     let data;
     try {
-      data = await request(url, method, body, headers, signal, retryConfig);
+      data = await request(url, method, body, headers, timeout, retryConfig);
     } catch (error) {
       return { ...message, error: error.toString() };
     }
@@ -119,16 +100,12 @@ async function route(message) {
       await rateLimiter.removeTokens(1);
     }
 
-    let signal;
-    if (timeoutFromMsg || timeoutFromConfig) {
-      signal = AbortSignal.timeout(timeoutFromMsg ?? timeoutFromConfig);
-    }
-
+    const timeout = timeoutFromMsg ?? timeoutFromConfig;
     let data;
     try {
       const method = "GET";
       const body = null;
-      data = await request(url, method, body, headers, signal, retryConfig);
+      data = await request(url, method, body, headers, timeout, retryConfig);
     } catch (error) {
       return { ...message, error: error.toString() };
     }
@@ -184,15 +161,11 @@ async function route(message) {
       await rateLimiter.removeTokens(1);
     }
 
-    let signal;
-    if (timeoutFromMsg || timeoutFromConfig) {
-      signal = AbortSignal.timeout(timeoutFromMsg ?? timeoutFromConfig);
-    }
-
+    const timeout = timeoutFromMsg ?? timeoutFromConfig;
     let data;
     try {
       const body = null;
-      data = await request(uri, "GET", body, headers, signal, retryConfig);
+      data = await request(uri, "GET", body, headers, timeout, retryConfig);
     } catch (error) {
       return { ...message, error: error.toString() };
     }
