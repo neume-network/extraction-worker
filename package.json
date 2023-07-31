@@ -4,7 +4,7 @@
   "description": "The purpose of the neume-network/core Extraction Worker (short: \"EW\") is to parallelize retrieving distributed information from various data sources by abstracting away the complexity of scaling processes accross a distributed system such as e.g. multiple node.js Worker threads.",
   "main": "./src/worker.mjs",
   "exports": "./src/worker.mjs",
-  "types": "./src/worker.d.ts",
+  "types": "./src/worker.d.mts",
   "ava": {
     "files": [
       "!test/start.mjs"
@@ -68,7 +68,7 @@
     "cross-fetch": "3.1.5",
     "debug": "4.3.4",
     "dotenv": "16.0.0",
-    "eth-fun": "github:il3ven/eth-fun#fork",
+    "eth-fun": "github:il3ven/eth-fun#1a57ff48ed7cfa05367bfa4497c51542b345c52b",
     "fastq": "1.13.0",
     "limiter": "2.0.1",
     "multiformats": "9.9.0"
